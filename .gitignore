@@ -4,3 +4,10 @@
 # Binary files
 bin/
 obj/
+
+# Error files of GPPG
+MyCompiler/config/*.lst
+
+# Generated Lexer and Parser
+MyCompiler/GeneratedParser/Lexer.cs
+MyCompiler/GeneratedParser/Parser.cs
