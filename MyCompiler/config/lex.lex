@@ -28,6 +28,10 @@ ID			{Alpha}{AlphaDigit}*
 	return res;
 }
 
+";" { return (int)Tokens.SEMICOLON; }
+"(" { return (int)Tokens.LRBRACKET; }
+")" { return (int)Tokens.RRBRACKET; }
+
 [^ \r\n] {
 	LexError();
 }
@@ -55,6 +59,7 @@ static class LexerHelper
     static LexerHelper()
     {
         keywords = new Dictionary<string,int>();
+        keywords.Add("print", (int)Tokens.PRINT);
     }
 
     public static int GetIDToken(string s) => keywords.ContainsKey(s) ? keywords[s] : (int)Tokens.ID;

@@ -10,9 +10,13 @@ namespace MyCompiler
     {
         static void Main(string[] args)
         {
+            //set culture for correct double values parsing
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
             string sourceCode = 
 @"
-hello
+print 1.5;
+print 100;
 ";
             //lexical analysis
             Scanner scanner = new Scanner();
