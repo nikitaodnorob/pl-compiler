@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyCompiler.SyntaxTree;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,12 @@ print 100;
 
             //syntax analysis
             Parser parser = new Parser(scanner);
-            parser.Parse();
+            bool isCorrect = parser.Parse();
+
+            if (isCorrect) //if program was parsed successfully
+            {
+                Node syntaxTree = parser.Root; //get program's syntax tree
+            }
         }
     }
 }

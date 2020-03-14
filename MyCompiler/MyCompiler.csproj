@@ -48,6 +48,8 @@
     <Compile Include="GeneratedParser\ShiftReduceParserCode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SyntaxTree\BaseClasses.cs" />
+    <Compile Include="SyntaxTree\SyntaxTree.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
