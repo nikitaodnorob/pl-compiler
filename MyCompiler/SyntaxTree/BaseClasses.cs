@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyCompiler.Visitors;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,10 @@ namespace MyCompiler.SyntaxTree
     /// <summary>
     /// Basic class of any node
     /// </summary>
-    public abstract class Node { }
+    public abstract class Node 
+    {
+        public abstract void Visit(BaseVisitor visitor);
+    }
 
     /// <summary>
     /// Basic class of any expressions

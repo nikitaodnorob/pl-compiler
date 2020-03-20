@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyCompiler.Visitors;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,8 @@ namespace MyCompiler.SyntaxTree
         public int Value { get; private set; }
 
         public IntNumNode(int value) { Value = value; }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitIntNumNode(this);
     }
 
     public class RealNumNode : ExprNode
@@ -18,6 +21,8 @@ namespace MyCompiler.SyntaxTree
         public double Value { get; private set; }
 
         public RealNumNode(double value) { Value = value; }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitRealNumNode(this);
     }
 
     public class BlockNode : StatNode
@@ -27,6 +32,8 @@ namespace MyCompiler.SyntaxTree
         public BlockNode(StatNode node) { Statements.Add(node); }
 
         public void AddStatement(StatNode node) { Statements.Add(node); }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitBlockNode(this);
     }
 
     public class PrintNode : StatNode
@@ -34,5 +41,7 @@ namespace MyCompiler.SyntaxTree
         public ExprNode Expression { get; private set; }
 
         public PrintNode(ExprNode expr) { Expression = expr; }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitPrintNode(this);
     }
 }
