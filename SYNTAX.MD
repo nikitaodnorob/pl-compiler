@@ -8,4 +8,4 @@ but first symbol isn't a digit
 * Function or method `Main` isn't required
 
 ## 2. Operators
-* `print <expression>`;
+* `print <expression>;`
