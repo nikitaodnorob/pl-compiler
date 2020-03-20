@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MyCompiler.SyntaxTree;
 
 namespace MyCompiler.Visitors
 {
@@ -125,6 +126,33 @@ namespace MyCompiler.Visitors
 
             //Set Main method as current block (push to stack)
             blocks.Push(mainMethodNode);
+        }
+
+        public override void VisitIntNumNode(IntNumNode node)
+        {
+            var literal = SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Value));
+            expressions.Push(literal);
+        }
+
+        public override void VisitRealNumNode(RealNumNode node)
+        {
+            var literal = SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Value));
+            expressions.Push(literal);
+        }
+
+        public override void VisitPrintNode(PrintNode node)
+        {
+            node.Expression.Visit(this);
+
+            //"print" operation in my language is Console.WriteLine method call
+            var printClassName = SyntaxFactory.IdentifierName("Console");
+            var printMethodName = SyntaxFactory.IdentifierName("WriteLine");
+            var printStatement = SyntaxFactory.ExpressionStatement(
+                SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, printClassName, printMethodName)
+                ).AddArgumentListArguments(SyntaxFactory.Argument(expressions.Pop()))
+            );
+            AddStatementToCurrentBlock(printStatement);
         }
     }
 }
