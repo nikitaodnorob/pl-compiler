@@ -11,3 +11,9 @@ MyCompiler/config/*.lst
 # Generated Lexer and Parser
 MyCompiler/GeneratedParser/Lexer.cs
 MyCompiler/GeneratedParser/Parser.cs
+
+# Compiled test program
+MyCompiler/*.exe
+
+# CSharp packages' binary files
+packages/
