@@ -727,6 +727,11 @@ namespace QUT.Gppg
         public LexLocation Merge(LexLocation last)
         { return new LexLocation(this.startLine, this.startColumn, last.endLine, last.endColumn); }
 
+        public override string ToString()
+        {
+            return $"({startLine}:{startColumn},{endLine}:{endColumn})";
+        }
+
     }
 
     /// <summary>

@@ -35,21 +35,21 @@
 
 %%
 
-program     : statementsList { Root = $1; } ;
+program     : statementsList { Root = $1; Root.Location = @$; } ;
 
-printStmt   : PRINT expression { $$ = new PrintNode($2); }
+printStmt   : PRINT expression { $$ = new PrintNode($2, @$); }
             ;
 
 statement   : printStmt SEMICOLON { $$ = $1; }
             ;
 
-statementsList  : statement { $$ = new BlockNode($1); }
+statementsList  : statement { $$ = new BlockNode($1, @$); }
                 | statementsList statement { $1.AddStatement($2); $$ = $1; }
                 ;
 
-expression  : INTNUM { $$ = new IntNumNode($1); }
-            | REALNUM { $$ = new RealNumNode($1); }
-            | ID { $$ = new IDNode($1); }
+expression  : INTNUM { $$ = new IntNumNode($1, @$); }
+            | REALNUM { $$ = new RealNumNode($1, @$); }
+            | ID { $$ = new IDNode($1, @$); }
             ;
 
 %%

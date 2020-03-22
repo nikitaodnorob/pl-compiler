@@ -1,4 +1,5 @@
 ﻿using MyCompiler.Visitors;
+using QUT.Gppg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace MyCompiler.SyntaxTree
     {
         public int Value { get; private set; }
 
-        public IntNumNode(int value) { Value = value; }
+        public IntNumNode(int value, LexLocation location) { Value = value; Location = location; }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitIntNumNode(this);
     }
@@ -20,7 +21,7 @@ namespace MyCompiler.SyntaxTree
     {
         public double Value { get; private set; }
 
-        public RealNumNode(double value) { Value = value; }
+        public RealNumNode(double value, LexLocation location) { Value = value; Location = location; }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitRealNumNode(this);
     }
@@ -29,7 +30,7 @@ namespace MyCompiler.SyntaxTree
     {
         public string Text { get; private set; }
 
-        public IDNode(string text) { Text = text; }
+        public IDNode(string text, LexLocation location) { Text = text; Location = location; }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitIDNode(this);
     }
@@ -38,7 +39,7 @@ namespace MyCompiler.SyntaxTree
     {
         public List<StatNode> Statements { get; private set; } = new List<StatNode>();
 
-        public BlockNode(StatNode node) { Statements.Add(node); }
+        public BlockNode(StatNode node, LexLocation location) { Statements.Add(node); Location = location; }
 
         public void AddStatement(StatNode node) { Statements.Add(node); }
 
@@ -49,7 +50,7 @@ namespace MyCompiler.SyntaxTree
     {
         public ExprNode Expression { get; private set; }
 
-        public PrintNode(ExprNode expr) { Expression = expr; }
+        public PrintNode(ExprNode expr, LexLocation location) { Expression = expr; Location = location; }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitPrintNode(this);
     }

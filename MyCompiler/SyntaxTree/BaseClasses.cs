@@ -1,4 +1,5 @@
 ﻿using MyCompiler.Visitors;
+using QUT.Gppg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,10 @@ namespace MyCompiler.SyntaxTree
     /// </summary>
     public abstract class Node 
     {
+        /// <summary>
+        /// Location of token in the source code
+        /// </summary>
+        public LexLocation Location { get; set; } 
         public abstract void Visit(BaseVisitor visitor);
     }
 
