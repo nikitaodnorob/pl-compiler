@@ -25,6 +25,15 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) => visitor.VisitRealNumNode(this);
     }
 
+    public class IDNode : ExprNode
+    {
+        public string Text { get; private set; }
+
+        public IDNode(string text) { Text = text; }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitIDNode(this);
+    }
+
     public class BlockNode : StatNode
     {
         public List<StatNode> Statements { get; private set; } = new List<StatNode>();

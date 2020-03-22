@@ -19,6 +19,8 @@ namespace MyCompiler.Visitors
 
         public virtual void VisitRealNumNode(RealNumNode node) { }
 
+        public virtual void VisitIDNode(IDNode node) { }
+
         public virtual void VisitBlockNode(BlockNode node) 
         {
             node.Statements.ForEach(statement => statement.Visit(this));

@@ -140,6 +140,12 @@ namespace MyCompiler.Visitors
             expressions.Push(literal);
         }
 
+        public override void VisitIDNode(IDNode node)
+        {
+            var identifer = SyntaxFactory.IdentifierName(node.Text);
+            expressions.Push(identifer);
+        }
+
         public override void VisitPrintNode(PrintNode node)
         {
             node.Expression.Visit(this);

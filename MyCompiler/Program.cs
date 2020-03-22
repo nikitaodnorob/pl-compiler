@@ -74,6 +74,7 @@ namespace MyCompiler
 @"
 print 1.5;
 print 100;
+print a;
 ";
             //lexical analysis
             Scanner scanner = new Scanner();

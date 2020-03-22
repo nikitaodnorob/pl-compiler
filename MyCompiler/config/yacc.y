@@ -49,7 +49,7 @@ statementsList  : statement { $$ = new BlockNode($1); }
 
 expression  : INTNUM { $$ = new IntNumNode($1); }
             | REALNUM { $$ = new RealNumNode($1); }
-            | ID
+            | ID { $$ = new IDNode($1); }
             ;
 
 %%
