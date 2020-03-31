@@ -14,7 +14,7 @@ namespace MyCompiler
     class Program
     {
         /// <summary>
-        /// Compile the program which is sets by syntax tree
+        /// Compile the program which is setted by syntax tree
         /// </summary>
         /// <param name="syntaxTree">Syntax tree</param>
         static void Compile(Node syntaxTree)
