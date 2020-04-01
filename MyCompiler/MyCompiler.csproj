@@ -94,6 +94,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Errors\ErrorHelpers.cs" />
+    <Compile Include="Errors\RussianErrorList.cs" />
     <Compile Include="GeneratedParser\Lexer.cs" />
     <Compile Include="GeneratedParser\Parser.cs" />
     <Compile Include="GeneratedParser\ShiftReduceParserCode.cs" />

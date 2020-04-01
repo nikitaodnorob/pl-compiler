@@ -10,6 +10,7 @@ using MyCompiler.Visitors;
 using System.IO;
 using QUT.Gppg;
 using Microsoft.CodeAnalysis.Text;
+using MyCompiler.Errors;
 
 namespace MyCompiler
 {
@@ -17,29 +18,7 @@ namespace MyCompiler
 
     class Program
     {
-        /// <summary>
-        /// Format error string
-        /// </summary>
-        /// <param name="diagnostic">Diagnostic message</param>
-        static string GetErrorString(Diagnostic diagnostic, LocationMap locationMap)
-        {
-            DiagnosticSeverity errorSeverity = diagnostic.Severity; //get severity
-            int errorCode = int.Parse(diagnostic.Id.Substring(2)); //skip prefix "CS" in error code
-            var errorSpan = diagnostic.Location.SourceSpan; //get error Roslyn's span
-
-            var (errorSpanStart, errorSpanEnd) = (errorSpan.Start, errorSpan.End);
-            try
-            {
-                var (locationStart, locationEnd) = (locationMap[errorSpanStart], locationMap[errorSpanEnd]);
-                LexLocation errorLocation = new LexLocation(locationStart, locationEnd);
-                return $"{errorLocation} {errorSeverity} {errorCode}";
-            }
-            catch
-            {
-                //when we can't get source position
-                return $"{errorSeverity} {errorCode}";
-            }
-        }
+        static ErrorFormatter errorFormatter = new ErrorFormatter();
 
         static Tuple<int, int> ParseAnnotationPart(string a) 
         {
@@ -115,13 +94,13 @@ namespace MyCompiler
 
                 //if we have warnings, print them
                 foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel > 0))
-                    Console.WriteLine(GetErrorString(error, locationMap));
+                    Console.WriteLine(errorFormatter.GetErrorString(error, locationMap));
 
                 if (!emitResult.Success)
                 {
                     //if we have errors, print them
                     foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel == 0))
-                        Console.WriteLine(GetErrorString(error, locationMap));
+                        Console.WriteLine(errorFormatter.GetErrorString(error, locationMap));
                 }
             }
 
