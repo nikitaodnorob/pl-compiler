@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MyCompiler.SyntaxTree;
+using QUT.Gppg;
 
 namespace MyCompiler.Visitors
 {
@@ -21,6 +22,8 @@ namespace MyCompiler.Visitors
         /// Stack of program blocks for remembering what block is current
         /// </summary>
         private Stack<SyntaxNode> blocks = new Stack<SyntaxNode>();
+
+        public List<SyntaxAnnotation> LocationAnnotations { get; private set; }
 
         /// <summary>
         /// Auxiliary function for generating tree node of Using syntax
@@ -126,23 +129,39 @@ namespace MyCompiler.Visitors
 
             //Set Main method as current block (push to stack)
             blocks.Push(mainMethodNode);
+
+            //initialize dictionary of location annotations
+            LocationAnnotations = new List<SyntaxAnnotation>();
+        }
+
+        private SyntaxNode GetNodeWithAnnotation(SyntaxNode node, LexLocation location)
+        {
+            var annotation = new SyntaxAnnotation(
+                "LocationAnnotation",
+                $"{location.StartLine},{location.StartColumn};{location.EndLine},{location.EndColumn}"
+            );
+            LocationAnnotations.Add(annotation);
+            return node.WithAdditionalAnnotations(annotation);
         }
 
         public override void VisitIntNumNode(IntNumNode node)
         {
             var literal = SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Value));
+            literal = GetNodeWithAnnotation(literal, node.Location) as LiteralExpressionSyntax;
             expressions.Push(literal);
         }
 
         public override void VisitRealNumNode(RealNumNode node)
         {
             var literal = SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Value));
+            literal = GetNodeWithAnnotation(literal, node.Location) as LiteralExpressionSyntax;
             expressions.Push(literal);
         }
 
         public override void VisitIDNode(IDNode node)
         {
             var identifer = SyntaxFactory.IdentifierName(node.Text);
+            identifer = GetNodeWithAnnotation(identifer, node.Location) as IdentifierNameSyntax;
             expressions.Push(identifer);
         }
 

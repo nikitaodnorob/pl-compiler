@@ -8,11 +8,72 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using MyCompiler.Visitors;
 using System.IO;
+using QUT.Gppg;
+using Microsoft.CodeAnalysis.Text;
 
 namespace MyCompiler
 {
+    using LocationMap = Dictionary<int, Tuple<int,int>>;
+
     class Program
     {
+        /// <summary>
+        /// Format error string
+        /// </summary>
+        /// <param name="diagnostic">Diagnostic message</param>
+        static string GetErrorString(Diagnostic diagnostic, LocationMap locationMap)
+        {
+            DiagnosticSeverity errorSeverity = diagnostic.Severity; //get severity
+            int errorCode = int.Parse(diagnostic.Id.Substring(2)); //skip prefix "CS" in error code
+            var errorSpan = diagnostic.Location.SourceSpan; //get error Roslyn's span
+
+            var (errorSpanStart, errorSpanEnd) = (errorSpan.Start, errorSpan.End);
+            try
+            {
+                var (locationStart, locationEnd) = (locationMap[errorSpanStart], locationMap[errorSpanEnd]);
+                LexLocation errorLocation = new LexLocation(locationStart, locationEnd);
+                return $"{errorLocation} {errorSeverity} {errorCode}";
+            }
+            catch
+            {
+                //when we can't get source position
+                return $"{errorSeverity} {errorCode}";
+            }
+        }
+
+        static Tuple<int, int> ParseAnnotationPart(string a) 
+        {
+            var parts = a.Split(',').Select(s => int.Parse(s)).ToList();
+            return Tuple.Create(parts[0], parts[1]);
+        }
+
+        /// <summary>
+        /// Build location map
+        /// </summary>
+        /// <param name="root">Root of Roslyn tree</param>
+        /// <param name="annotations">List of location annotations</param>
+        /// <returns>Matching of Roslyn's positions and locations in source code</returns>
+        static LocationMap GetLocationMap(SyntaxNode root, List<SyntaxAnnotation> annotations)
+        {
+            LocationMap result = new LocationMap();
+
+            foreach (var annotation in annotations)
+            {
+                var node = root.GetAnnotatedNodes(annotation).FirstOrDefault();
+                if (node == null) continue;
+
+                var nodeSpan = node.FullSpan;
+                var nodeAnnotationParts = annotation.Data.Split(';');
+
+                if (!result.ContainsKey(nodeSpan.Start))
+                    result.Add(nodeSpan.Start, ParseAnnotationPart(nodeAnnotationParts[0]));
+                if (!result.ContainsKey(nodeSpan.End))
+                    result.Add(nodeSpan.End, ParseAnnotationPart(nodeAnnotationParts[1]));
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Compile the program which is setted by syntax tree
         /// </summary>
@@ -27,6 +88,10 @@ namespace MyCompiler
 
             //get unit which prepared for compilation
             var programUnit = visitor.UnitNode;
+
+            //get all location annotations and build location map
+            var locationAnnotations = visitor.LocationAnnotations;
+            var locationMap = GetLocationMap(programUnit, locationAnnotations);
 
             CSharpCompilation compilation = CSharpCompilation.Create(
                 "assemblyName",
@@ -50,13 +115,13 @@ namespace MyCompiler
 
                 //if we have warnings, print them
                 foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel > 0))
-                    Console.WriteLine(error);
+                    Console.WriteLine(GetErrorString(error, locationMap));
 
                 if (!emitResult.Success)
                 {
                     //if we have errors, print them
                     foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel == 0))
-                        Console.WriteLine(error);
+                        Console.WriteLine(GetErrorString(error, locationMap));
                 }
             }
 

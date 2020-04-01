@@ -732,6 +732,14 @@ namespace QUT.Gppg
             return $"({startLine}:{startColumn},{endLine}:{endColumn})";
         }
 
+        public LexLocation(Tuple<int,int> start, Tuple<int,int> end)
+        {
+            startLine = start.Item1; 
+            startColumn = start.Item2;
+            endLine = end.Item1; 
+            endColumn = end.Item2;
+        }
+
     }
 
     /// <summary>
