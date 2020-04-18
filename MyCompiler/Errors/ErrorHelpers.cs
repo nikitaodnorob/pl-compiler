@@ -24,7 +24,7 @@ namespace MyCompiler.Errors
             int errorCode = diagnostic.Code;
             var errorSpan = diagnostic.Location.SourceSpan; //get error Roslyn's span
             var arguments = diagnostic.Arguments;
-            string errorMessage = errorList.GetErrorMessage(errorCode, arguments);
+            string errorMessage = errorList.GetErrorMessage(diagnostic, arguments);
             if (errorMessage != "") errorMessage = ": " + errorMessage;
 
             var (errorSpanStart, errorSpanEnd) = (errorSpan.Start, errorSpan.End);
@@ -44,10 +44,10 @@ namespace MyCompiler.Errors
 
     public abstract class ErrorList
     {
-        public string GetErrorMessage(int code, IEnumerable<object> arguments)
+        public string GetErrorMessage(Diagnostic diagnostic, IEnumerable<object> arguments)
         {
-            string template = GetErrorTemplate(code);
-            return string.Format(template, arguments.ToArray());
+            string template = GetErrorTemplate(diagnostic.Code);
+            return template.Length > 0 ? string.Format(template, arguments.ToArray()) : diagnostic.GetMessage();
         }
 
         public abstract string GetErrorTemplate(int code);
