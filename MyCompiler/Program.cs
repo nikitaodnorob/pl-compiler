@@ -139,11 +139,8 @@ namespace MyCompiler
             //set culture for correct double values parsing
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
-            string sourceCode = 
-@"
-print 1.5;
-print 100;
-";
+            string sourceCode = File.ReadAllText("../../../program.mylang");
+
             //lexical analysis
             Scanner scanner = new Scanner();
             scanner.SetSource(sourceCode, 0);
