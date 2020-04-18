@@ -13,7 +13,7 @@ MyCompiler/GeneratedParser/Lexer.cs
 MyCompiler/GeneratedParser/Parser.cs
 
 # Compiled test program
-MyCompiler/*.exe
+MyCompiler/out/
 
 # CSharp packages' binary files
 packages/

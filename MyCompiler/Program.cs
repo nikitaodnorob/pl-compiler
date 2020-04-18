@@ -11,6 +11,7 @@ using System.IO;
 using QUT.Gppg;
 using Microsoft.CodeAnalysis.Text;
 using MyCompiler.Errors;
+using System.Reflection;
 
 namespace MyCompiler
 {
@@ -53,6 +54,24 @@ namespace MyCompiler
             return result;
         }
 
+        static void GenerateRuntimeConfig(string configPath)
+        {
+            string netCoreVersion = "3.1.3";
+            using (StreamWriter sw = new StreamWriter(configPath))
+            {
+                sw.WriteLine(
+@"{
+    ""runtimeOptions"": {
+        ""tfm"": ""netcoreapp3.0"",
+        ""framework"": {
+            ""name"": ""Microsoft.NETCore.App"",
+            ""version"": """ + netCoreVersion + @"""
+        }
+    }
+}");
+            }
+        }
+
         /// <summary>
         /// Compile the program which is setted by syntax tree
         /// </summary>
@@ -75,7 +94,11 @@ namespace MyCompiler
             CSharpCompilation compilation = CSharpCompilation.Create(
                 "assemblyName",
                 new[] { programUnit.SyntaxTree },
-                new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) },
+                new[] {
+                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
+                    MetadataReference.CreateFromFile(typeof(Console).Assembly.Location)
+                },
                 new CSharpCompilationOptions(
                     OutputKind.ConsoleApplication, //set application type as console app
                     true, //report about suppressed errors and warnings
@@ -87,8 +110,10 @@ namespace MyCompiler
                 )
             );
 
+            GenerateRuntimeConfig("../../../out/program.runtimeconfig.json"); //generate runtime config
+
             //generate program to "program.exe" file
-            using (var exeStream = new FileStream("../../program.exe", FileMode.Create))
+            using (var exeStream = new FileStream("../../../out/program.exe", FileMode.Create))
             {
                 var emitResult = compilation.Emit(exeStream); //compile
 
@@ -118,7 +143,6 @@ namespace MyCompiler
 @"
 print 1.5;
 print 100;
-print a;
 ";
             //lexical analysis
             Scanner scanner = new Scanner();
