@@ -67,10 +67,10 @@ namespace MyCompiler.SyntaxTree
     public class DefineVarNode : StatNode
     {
         public TypeNode Type { get; private set; }
-        public IDNode ID { get; private set; }
-        public DefineVarNode(TypeNode type, IDNode id, LexLocation location)
+        public List<AssignVarNode> Variables { get; private set; }
+        public DefineVarNode(TypeNode type, List<AssignVarNode> vars, LexLocation location)
         {
-            Type = type; ID = id; Location = location;
+            Type = type; Variables = vars; Location = location;
         }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitDefineVarNode(this);

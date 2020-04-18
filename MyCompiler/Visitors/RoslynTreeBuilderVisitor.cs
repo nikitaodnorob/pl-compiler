@@ -165,6 +165,16 @@ namespace MyCompiler.Visitors
             return node.WithAdditionalAnnotations(annotation);
         }
 
+        private SyntaxToken GetNodeWithAnnotation(SyntaxToken node, LexLocation location)
+        {
+            var annotation = new SyntaxAnnotation(
+                "LocationAnnotation",
+                $"{location.StartLine},{location.StartColumn};{location.EndLine},{location.EndColumn}"
+            );
+            LocationAnnotations.Add(annotation);
+            return node.WithAdditionalAnnotations(annotation);
+        }
+
         public override void VisitIntNumNode(IntNumNode node)
         {
             var literal = SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Value));
@@ -210,14 +220,26 @@ namespace MyCompiler.Visitors
 
         public override void VisitDefineVarNode(DefineVarNode node)
         {
-            node.ID.Visit(this);
             node.Type.Visit(this);
-
             var type = expressions.Pop();
-            var id = expressions.Pop();
 
             var defineVar = SyntaxFactory.VariableDeclaration(type as TypeSyntax);
-            defineVar = defineVar.AddVariables(SyntaxFactory.VariableDeclarator((id as IdentifierNameSyntax).Identifier));
+
+            foreach (var variable in node.Variables)
+            {
+                variable.Expression?.Visit(this);
+
+                var id = SyntaxFactory.IdentifierName(variable.ID.Text);
+                id = GetNodeWithAnnotation(id, variable.ID.Location) as IdentifierNameSyntax;
+
+                var identifer = GetNodeWithAnnotation(id.Identifier, variable.ID.Location);
+                var variableNode = SyntaxFactory.VariableDeclarator(identifer);
+                if (variable.Expression != null) variableNode = variableNode.WithInitializer(SyntaxFactory.EqualsValueClause(expressions.Pop()));
+                variableNode = GetNodeWithAnnotation(variableNode, variable.Location) as VariableDeclaratorSyntax;
+
+                defineVar = defineVar.AddVariables(variableNode);
+            }
+            
             defineVar = GetNodeWithAnnotation(defineVar, node.Location) as VariableDeclarationSyntax;
 
             AddVariableToCurrentBlock(defineVar);

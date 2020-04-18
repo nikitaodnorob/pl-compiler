@@ -18,6 +18,8 @@
     public AssignVarNode assignVarValue;
     public IDNode idValue;
     public TypeNode typeValue;
+
+    public List<AssignVarNode> defineVarsListValue;
 }
 
 %using System.IO;
@@ -25,7 +27,7 @@
 
 %namespace MyCompiler
 
-%token LRBRACKET RRBRACKET SEMICOLON PRINT
+%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT
 %token ASSIGNEQ
 
 %token <iValue> INTNUM
@@ -37,11 +39,13 @@
 
 %type <blockValue> statementsList
 %type <printValue> printStmt
-%type <defineVarValue> defineVarStmt
-%type <assignVarValue> assignVarStmt
+%type <defineVarValue> defineVarsStmt
+%type <assignVarValue> assignVarStmt defineVarsItem
 
 %type <typeValue> type
 %type <idValue> ident
+
+%type <defineVarsListValue> defineVarList
 
 %%
 
@@ -54,12 +58,20 @@ ident           : ID { $$ = new IDNode($1, @$); } ;
 printStmt       : PRINT expression { $$ = new PrintNode($2, @$); }
                 ;
 
-defineVarStmt   : type ident { $$ = new DefineVarNode($1, $2, @$); } ;
+defineVarsStmt  : type defineVarList { $$ = new DefineVarNode($1, $2, @$); } ;
+
+defineVarsItem  : ident { $$ = new AssignVarNode($1, null, @$); }
+                | ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$); }
+                ;
+
+defineVarList   : defineVarsItem { $$ = new List<AssignVarNode> { $1 }; }
+                | defineVarList COMMA defineVarsItem { $1.Add($3); $$ = $1; }
+                ;
 
 assignVarStmt   : ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$); } ;
 
 statement       : printStmt SEMICOLON { $$ = $1; }
-                | defineVarStmt SEMICOLON { $$ = $1; }
+                | defineVarsStmt SEMICOLON { $$ = $1; }
                 | assignVarStmt SEMICOLON { $$ = $1; }
                 ;
 

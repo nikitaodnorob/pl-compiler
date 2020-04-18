@@ -1,3 +1,5 @@
-int a;
+int a, b = 6, c = 4;
 a = 5;
 print a;
+print b;
+print c;
