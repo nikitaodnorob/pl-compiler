@@ -21,6 +21,8 @@ namespace MyCompiler.Visitors
 
         public virtual void VisitIDNode(IDNode node) { }
 
+        public virtual void VisitTypeNode(TypeNode node) { }
+
         public virtual void VisitBlockNode(BlockNode node) 
         {
             node.Statements.ForEach(statement => statement.Visit(this));
@@ -30,5 +32,7 @@ namespace MyCompiler.Visitors
         {
             node.Expression.Visit(this);
         }
+
+        public virtual void VisitDefineVarNode(DefineVarNode node) { }
     }
 }

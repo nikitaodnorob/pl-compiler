@@ -14,6 +14,9 @@
 
     public BlockNode blockValue;
     public PrintNode printValue;
+    public DefineVarNode defineVarValue;
+    public IDNode idValue;
+    public TypeNode typeValue;
 }
 
 %using System.IO;
@@ -22,6 +25,7 @@
 %namespace MyCompiler
 
 %token LRBRACKET RRBRACKET SEMICOLON PRINT
+%token ASSIGNEQ
 
 %token <iValue> INTNUM
 %token <dValue> REALNUM
@@ -32,15 +36,26 @@
 
 %type <blockValue> statementsList
 %type <printValue> printStmt
+%type <defineVarValue> defineVarStmt
+
+%type <typeValue> type
+%type <idValue> ident
 
 %%
 
 program     : statementsList { Root = $1; Root.Location = @$; } ;
 
+type    : ID { $$ = new TypeNode($1, @$); } ;
+
+ident   : ID { $$ = new IDNode($1, @$); } ;
+
 printStmt   : PRINT expression { $$ = new PrintNode($2, @$); }
             ;
 
+defineVarStmt   : type ident { $$ = new DefineVarNode($1, $2, @$); } ;
+
 statement   : printStmt SEMICOLON { $$ = $1; }
+            | defineVarStmt SEMICOLON { $$ = $1; }
             ;
 
 statementsList  : statement { $$ = new BlockNode($1, @$); }
@@ -49,7 +64,7 @@ statementsList  : statement { $$ = new BlockNode($1, @$); }
 
 expression  : INTNUM { $$ = new IntNumNode($1, @$); }
             | REALNUM { $$ = new RealNumNode($1, @$); }
-            | ID { $$ = new IDNode($1, @$); }
+            | ident { $$ = $1; }
             ;
 
 %%

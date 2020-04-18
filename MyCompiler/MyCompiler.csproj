@@ -16,6 +16,7 @@
     <None Remove="config\generate.bat" />
     <None Remove="config\Gplex.exe" />
     <None Remove="config\Gppg.exe" />
+    <None Remove="config\yacc.lst" />
   </ItemGroup>
 
   <ItemGroup>

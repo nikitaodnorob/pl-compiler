@@ -35,6 +35,15 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) => visitor.VisitIDNode(this);
     }
 
+    public class TypeNode : Node
+    {
+        public string Name { get; private set; }
+
+        public TypeNode(string name, LexLocation location) { Name = name; Location = location; }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitTypeNode(this);
+    }
+
     public class BlockNode : StatNode
     {
         public List<StatNode> Statements { get; private set; } = new List<StatNode>();
@@ -53,5 +62,17 @@ namespace MyCompiler.SyntaxTree
         public PrintNode(ExprNode expr, LexLocation location) { Expression = expr; Location = location; }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitPrintNode(this);
+    }
+
+    public class DefineVarNode : StatNode
+    {
+        public TypeNode Type { get; private set; }
+        public IDNode ID { get; private set; }
+        public DefineVarNode(TypeNode type, IDNode id, LexLocation location)
+        {
+            Type = type; ID = id; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitDefineVarNode(this);
     }
 }

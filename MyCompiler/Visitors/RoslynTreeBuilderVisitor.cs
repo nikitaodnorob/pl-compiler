@@ -63,6 +63,27 @@ namespace MyCompiler.Visitors
         }
 
         /// <summary>
+        /// Auxiliary function for adding the variables into current block (it is in the top of blocks' stack)
+        /// </summary>
+        /// <param name="statement">Node of variable declaration</param>
+        private void AddVariableToCurrentBlock(VariableDeclarationSyntax statement)
+        {
+            //look current block
+            SyntaxNode currentBlock = blocks.Peek();
+
+            //if statement isn't in any block, it's need to add the statement to Main method in C#
+            if (currentBlock is MethodDeclarationSyntax && (currentBlock as MethodDeclarationSyntax).Identifier.Text == "Main")
+            {
+                var declaration = SyntaxFactory.FieldDeclaration(statement);
+                declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
+                programClassNode = programClassNode.AddMembers(declaration);
+            }
+
+            //if we forget some type of block, we will get an exception
+            else throw new Exception($"current block was {currentBlock.GetType()}");
+        }
+
+        /// <summary>
         /// Node of C# unit which contains all classes
         /// </summary>
         private CompilationUnitSyntax unitNode;
@@ -165,6 +186,13 @@ namespace MyCompiler.Visitors
             expressions.Push(identifer);
         }
 
+        public override void VisitTypeNode(TypeNode node)
+        {
+            var type = SyntaxFactory.ParseTypeName(node.Name);
+            type = GetNodeWithAnnotation(type, node.Location) as TypeSyntax;
+            expressions.Push(type);
+        }
+
         public override void VisitPrintNode(PrintNode node)
         {
             node.Expression.Visit(this);
@@ -178,6 +206,21 @@ namespace MyCompiler.Visitors
                 ).AddArgumentListArguments(SyntaxFactory.Argument(expressions.Pop()))
             );
             AddStatementToCurrentBlock(printStatement);
+        }
+
+        public override void VisitDefineVarNode(DefineVarNode node)
+        {
+            node.ID.Visit(this);
+            node.Type.Visit(this);
+
+            var type = expressions.Pop();
+            var id = expressions.Pop();
+
+            var defineVar = SyntaxFactory.VariableDeclaration(type as TypeSyntax);
+            defineVar = defineVar.AddVariables(SyntaxFactory.VariableDeclarator((id as IdentifierNameSyntax).Identifier));
+            defineVar = GetNodeWithAnnotation(defineVar, node.Location) as VariableDeclarationSyntax;
+
+            AddVariableToCurrentBlock(defineVar);
         }
     }
 }

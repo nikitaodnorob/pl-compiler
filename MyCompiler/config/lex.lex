@@ -31,6 +31,7 @@ ID			{Alpha}{AlphaDigit}*
 ";" { return (int)Tokens.SEMICOLON; }
 "(" { return (int)Tokens.LRBRACKET; }
 ")" { return (int)Tokens.RRBRACKET; }
+"=" { return (int)Tokens.ASSIGNEQ; }
 
 [^ \r\n] {
 	LexError();
