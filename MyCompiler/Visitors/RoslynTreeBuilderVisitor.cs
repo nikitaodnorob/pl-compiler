@@ -222,5 +222,17 @@ namespace MyCompiler.Visitors
 
             AddVariableToCurrentBlock(defineVar);
         }
+
+        public override void VisitAssignVarNode(AssignVarNode node)
+        {
+            node.Expression.Visit(this);
+            node.ID.Visit(this);
+
+            var kindAssigment = SyntaxKind.SimpleAssignmentExpression;
+            var assignVar = SyntaxFactory.AssignmentExpression(kindAssigment, expressions.Pop(), expressions.Pop());
+            assignVar = GetNodeWithAnnotation(assignVar, node.Location) as AssignmentExpressionSyntax;
+
+            AddStatementToCurrentBlock(SyntaxFactory.ExpressionStatement(assignVar));
+        }
     }
 }

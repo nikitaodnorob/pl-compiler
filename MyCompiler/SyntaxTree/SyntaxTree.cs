@@ -75,4 +75,17 @@ namespace MyCompiler.SyntaxTree
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitDefineVarNode(this);
     }
+
+    public class AssignVarNode : StatNode
+    {
+        public IDNode ID { get; private set; }
+        public ExprNode Expression { get; private set; }
+
+        public AssignVarNode(IDNode id, ExprNode expression, LexLocation location)
+        {
+            ID = id; Expression = expression; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitAssignVarNode(this);
+    }
 }

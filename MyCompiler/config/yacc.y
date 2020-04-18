@@ -15,6 +15,7 @@
     public BlockNode blockValue;
     public PrintNode printValue;
     public DefineVarNode defineVarValue;
+    public AssignVarNode assignVarValue;
     public IDNode idValue;
     public TypeNode typeValue;
 }
@@ -37,34 +38,38 @@
 %type <blockValue> statementsList
 %type <printValue> printStmt
 %type <defineVarValue> defineVarStmt
+%type <assignVarValue> assignVarStmt
 
 %type <typeValue> type
 %type <idValue> ident
 
 %%
 
-program     : statementsList { Root = $1; Root.Location = @$; } ;
+program         : statementsList { Root = $1; Root.Location = @$; } ;
 
-type    : ID { $$ = new TypeNode($1, @$); } ;
+type            : ID { $$ = new TypeNode($1, @$); } ;
 
-ident   : ID { $$ = new IDNode($1, @$); } ;
+ident           : ID { $$ = new IDNode($1, @$); } ;
 
-printStmt   : PRINT expression { $$ = new PrintNode($2, @$); }
-            ;
+printStmt       : PRINT expression { $$ = new PrintNode($2, @$); }
+                ;
 
 defineVarStmt   : type ident { $$ = new DefineVarNode($1, $2, @$); } ;
 
-statement   : printStmt SEMICOLON { $$ = $1; }
-            | defineVarStmt SEMICOLON { $$ = $1; }
-            ;
+assignVarStmt   : ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$); } ;
+
+statement       : printStmt SEMICOLON { $$ = $1; }
+                | defineVarStmt SEMICOLON { $$ = $1; }
+                | assignVarStmt SEMICOLON { $$ = $1; }
+                ;
 
 statementsList  : statement { $$ = new BlockNode($1, @$); }
                 | statementsList statement { $1.AddStatement($2); $$ = $1; }
                 ;
 
-expression  : INTNUM { $$ = new IntNumNode($1, @$); }
-            | REALNUM { $$ = new RealNumNode($1, @$); }
-            | ident { $$ = $1; }
-            ;
+expression      : INTNUM { $$ = new IntNumNode($1, @$); }
+                | REALNUM { $$ = new RealNumNode($1, @$); }
+                | ident { $$ = $1; }
+                ;
 
 %%
