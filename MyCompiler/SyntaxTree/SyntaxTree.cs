@@ -91,14 +91,26 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) => visitor.VisitAssignVarNode(this);
     }
 
-    public class FunctionArgumentNode : Node
+    public class DefineFunctionArgumentNode : Node
     {
         public TypeNode Type { get; private set; }
         public IDNode Name { get; private set; }
 
-        public FunctionArgumentNode(TypeNode type, IDNode name, LexLocation location) 
+        public DefineFunctionArgumentNode(TypeNode type, IDNode name, LexLocation location) 
         { 
             Type = type; Name = name; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) { }
+    }
+
+    public class CallFunctionArgumentNode : Node
+    {
+        public ExprNode Expression { get; private set; }
+
+        public CallFunctionArgumentNode(ExprNode expression, LexLocation location)
+        {
+            Expression = expression; Location = location;
         }
 
         public override void Visit(BaseVisitor visitor) { }
@@ -108,13 +120,13 @@ namespace MyCompiler.SyntaxTree
     {
         public IDNode ID { get; private set; }
         public TypeNode ReturnType { get; private set; }
-        public List<FunctionArgumentNode> Arguments { get; private set; }
+        public List<DefineFunctionArgumentNode> Arguments { get; private set; }
         public BlockNode Body { get; private set; }
 
         public DefineFunctionNode(
             TypeNode returnType,
             IDNode id,
-            List<FunctionArgumentNode> arguments,
+            List<DefineFunctionArgumentNode> arguments,
             BlockNode body,
             LexLocation location
         )
@@ -123,5 +135,18 @@ namespace MyCompiler.SyntaxTree
         }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitDefineFunctionNode(this);
+    }
+
+    public class CallProcedureNode : StatNode
+    {
+        public IDNode Name { get; private set; }
+        public List<CallFunctionArgumentNode> Arguments { get; private set; }
+
+        public CallProcedureNode(IDNode name, List<CallFunctionArgumentNode> arguments, LexLocation location)
+        {
+            Name = name; Arguments = arguments; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitCallProcedureNode(this);
     }
 }

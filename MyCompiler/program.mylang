@@ -8,3 +8,5 @@ void printN(int n) {
 	int res = n;
 	print res;
 }
+
+printN(1000);

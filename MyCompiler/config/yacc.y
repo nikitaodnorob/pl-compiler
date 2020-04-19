@@ -19,9 +19,11 @@
     public IDNode idValue;
     public TypeNode typeValue;
     public DefineFunctionNode defineFuncValue;
+    public CallProcedureNode callProcValue;
 
     public List<AssignVarNode> defineVarsListValue;
-    public List<FunctionArgumentNode> functionArgumentsValue;
+    public List<DefineFunctionArgumentNode> defineFuncArgumentsValue;
+    public List<CallFunctionArgumentNode> callFuncArgumentsValue;
 }
 
 %using System.IO;
@@ -48,9 +50,11 @@
 %type <idValue> ident
 
 %type <defineVarsListValue> defineVarList
-%type <functionArgumentsValue> funcArgsList
+%type <defineFuncArgumentsValue> defFuncArgList
+%type <callFuncArgumentsValue> callFuncArgList
 
 %type <defineFuncValue> defineFuncStmt
+%type <callProcValue> callFuncStmt
 
 %%
 
@@ -75,21 +79,28 @@ defineVarList   : defineVarsItem { $$ = new List<AssignVarNode> { $1 }; }
 
 assignVarStmt   : ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$); } ;
 
-funcArgsList    : type ident { $$ = new List<FunctionArgumentNode> { new FunctionArgumentNode($1, $2, @$) }; }
-                | funcArgsList COMMA type ident { $1.Add(new FunctionArgumentNode($3, $4, @$)); $$ = $1; }
+defFuncArgList  : type ident { $$ = new List<DefineFunctionArgumentNode> { new DefineFunctionArgumentNode($1, $2, @$) }; }
+                | defFuncArgList COMMA type ident { $1.Add(new DefineFunctionArgumentNode($3, $4, @$)); $$ = $1; }
                 ;
 
-defineFuncStmt  : type ident LRBRACKET funcArgsList RRBRACKET block
+callFuncArgList : expression { $$ = new List<CallFunctionArgumentNode> { new CallFunctionArgumentNode($1, @$) }; }
+                | callFuncArgList COMMA expression { $1.Add(new CallFunctionArgumentNode($3, @$)); $$ = $1; }
+                ;
+
+defineFuncStmt  : type ident LRBRACKET defFuncArgList RRBRACKET block
                   {
                     $$ = new DefineFunctionNode($1, $2, $4, $6, @$);
                   }
                 ;
+
+callFuncStmt    : ident LRBRACKET callFuncArgList RRBRACKET { $$ = new CallProcedureNode($1, $3, @$); } ;
 
 statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineVarsStmt SEMICOLON { $$ = $1; }
                 | assignVarStmt SEMICOLON { $$ = $1; }
                 | block { $$ = $1; }
                 | defineFuncStmt { $$ = $1; }
+                | callFuncStmt SEMICOLON { $$ = $1; }
                 ;
 
 block           : LFBRACKET RFBRACKET { $$ = new BlockNode(@$); }

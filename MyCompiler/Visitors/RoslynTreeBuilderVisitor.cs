@@ -296,27 +296,45 @@ namespace MyCompiler.Visitors
                 : SyntaxFactory.ParseTypeName(node.ReturnType.Name);
             returnType = GetNodeWithAnnotation(returnType, node.ReturnType.Location) as TypeSyntax;
 
-            var functionNode = SyntaxFactory.MethodDeclaration(returnType, node.ID.Text)
+            var defineFunction = SyntaxFactory.MethodDeclaration(returnType, node.ID.Text)
                 .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
 
-            node.Arguments.ForEach(arg => functionNode = functionNode.AddParameterListParameters(
+            node.Arguments.ForEach(arg => defineFunction = defineFunction.AddParameterListParameters(
                 SyntaxFactory.Parameter(GetNodeWithAnnotation(SyntaxFactory.Identifier(arg.Name.Text), arg.Name.Location))
                 .WithType(GetNodeWithAnnotation(SyntaxFactory.ParseTypeName(arg.Type.Name), arg.Type.Location) as TypeSyntax)
             ));
 
             if (node.Body.Statements.Count == 0) //if empty function
             {
-                functionNode = functionNode.WithBody(SyntaxFactory.Block());
+                defineFunction = defineFunction.WithBody(SyntaxFactory.Block());
             }
             else
             {
-                blocks.Push(functionNode);
+                blocks.Push(defineFunction);
                 node.Body.Statements.ForEach(statement => statement.Visit(this));
-                functionNode = blocks.Pop() as MethodDeclarationSyntax;
+                defineFunction = blocks.Pop() as MethodDeclarationSyntax;
             }
 
-            functionNode = GetNodeWithAnnotation(functionNode, node.Location) as MethodDeclarationSyntax;
-            programClassNode = programClassNode.AddMembers(functionNode);
+            defineFunction = GetNodeWithAnnotation(defineFunction, node.Location) as MethodDeclarationSyntax;
+            programClassNode = programClassNode.AddMembers(defineFunction);
+        }
+
+        public override void VisitCallProcedureNode(CallProcedureNode node)
+        {
+            var procedureName = SyntaxFactory.IdentifierName(node.Name.Text);
+            procedureName = GetNodeWithAnnotation(procedureName, node.Name.Location) as IdentifierNameSyntax;
+
+            var callProcedure = SyntaxFactory.InvocationExpression(procedureName);
+
+            foreach (var parameter in node.Arguments)
+            {
+                parameter.Expression.Visit(this);
+                var arg = GetNodeWithAnnotation(SyntaxFactory.Argument(expressions.Pop()), parameter.Location) as ArgumentSyntax;
+                callProcedure = callProcedure.AddArgumentListArguments(arg);
+            }
+
+            callProcedure = GetNodeWithAnnotation(callProcedure, node.Location) as InvocationExpressionSyntax;
+            AddStatementToCurrentBlock(SyntaxFactory.ExpressionStatement(callProcedure));
         }
     }
 }
