@@ -57,6 +57,11 @@ namespace MyCompiler.Visitors
             //if statement isn't in any block, it's need to add the statement to Main method in C#
             if (currentBlock is MethodDeclarationSyntax && (currentBlock as MethodDeclarationSyntax).Identifier.Text == "Main")
                 mainMethodNode = mainMethodNode.AddBodyStatements(statement);
+            else if (currentBlock is BlockSyntax)
+            {
+                blocks.Pop();
+                blocks.Push((currentBlock as BlockSyntax).AddStatements(statement));
+            }
 
             //if we forget some type of block, we will get an exception
             else throw new Exception($"current block was {currentBlock.GetType()}");
@@ -77,6 +82,12 @@ namespace MyCompiler.Visitors
                 var declaration = SyntaxFactory.FieldDeclaration(statement);
                 declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
                 programClassNode = programClassNode.AddMembers(declaration);
+            }
+            else if (currentBlock is BlockSyntax)
+            {
+                blocks.Pop();
+                var declaration = SyntaxFactory.LocalDeclarationStatement(statement);
+                blocks.Push((currentBlock as BlockSyntax).AddStatements(declaration));
             }
 
             //if we forget some type of block, we will get an exception
@@ -255,6 +266,16 @@ namespace MyCompiler.Visitors
             assignVar = GetNodeWithAnnotation(assignVar, node.Location) as AssignmentExpressionSyntax;
 
             AddStatementToCurrentBlock(SyntaxFactory.ExpressionStatement(assignVar));
+        }
+
+        public override void VisitBlockNode(BlockNode node)
+        {
+            if (!node.IsMainBlock) blocks.Push(SyntaxFactory.Block());
+            node.Statements.ForEach(statement => statement.Visit(this));
+            if (!node.IsMainBlock) {
+                var block = blocks.Pop();
+                AddStatementToCurrentBlock(GetNodeWithAnnotation(block, node.Location) as BlockSyntax);
+            }
         }
     }
 }

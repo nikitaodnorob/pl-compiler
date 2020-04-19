@@ -47,8 +47,10 @@ namespace MyCompiler.SyntaxTree
     public class BlockNode : StatNode
     {
         public List<StatNode> Statements { get; private set; } = new List<StatNode>();
+        public bool IsMainBlock { get; set; } = false;
 
         public BlockNode(StatNode node, LexLocation location) { Statements.Add(node); Location = location; }
+        public BlockNode(LexLocation location) { Location = location; }
 
         public void AddStatement(StatNode node) { Statements.Add(node); }
 

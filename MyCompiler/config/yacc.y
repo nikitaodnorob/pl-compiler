@@ -27,7 +27,7 @@
 
 %namespace MyCompiler
 
-%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT
+%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET
 %token ASSIGNEQ
 
 %token <iValue> INTNUM
@@ -37,7 +37,7 @@
 %type <exprValue> expression
 %type <statValue> statement
 
-%type <blockValue> statementsList
+%type <blockValue> statementsList block
 %type <printValue> printStmt
 %type <defineVarValue> defineVarsStmt
 %type <assignVarValue> assignVarStmt defineVarsItem
@@ -49,7 +49,7 @@
 
 %%
 
-program         : statementsList { Root = $1; Root.Location = @$; } ;
+program         : statementsList { Root = $1; Root.Location = @$; (Root as BlockNode).IsMainBlock = true; } ;
 
 type            : ID { $$ = new TypeNode($1, @$); } ;
 
@@ -73,6 +73,11 @@ assignVarStmt   : ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$)
 statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineVarsStmt SEMICOLON { $$ = $1; }
                 | assignVarStmt SEMICOLON { $$ = $1; }
+                | block { $$ = $1; }
+                ;
+
+block           : LFBRACKET RFBRACKET { $$ = new BlockNode(@$); }
+                | LFBRACKET statementsList RFBRACKET { $$ = $2; }
                 ;
 
 statementsList  : statement { $$ = new BlockNode($1, @$); }

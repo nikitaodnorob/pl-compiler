@@ -33,8 +33,10 @@ ID			{Alpha}{AlphaDigit}*
 "(" { return (int)Tokens.LRBRACKET; }
 ")" { return (int)Tokens.RRBRACKET; }
 "=" { return (int)Tokens.ASSIGNEQ; }
+"{" { return (int)Tokens.LFBRACKET; }
+"}" { return (int)Tokens.RFBRACKET; }
 
-[^ \r\n] {
+[^ \r\n\t] {
 	LexError();
 }
 
