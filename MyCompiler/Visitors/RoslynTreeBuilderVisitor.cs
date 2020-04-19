@@ -62,6 +62,11 @@ namespace MyCompiler.Visitors
                 blocks.Pop();
                 blocks.Push((currentBlock as BlockSyntax).AddStatements(statement));
             }
+            else if (currentBlock is MethodDeclarationSyntax)
+            {
+                blocks.Pop();
+                blocks.Push((currentBlock as MethodDeclarationSyntax).AddBodyStatements(statement));
+            }
 
             //if we forget some type of block, we will get an exception
             else throw new Exception($"current block was {currentBlock.GetType()}");
@@ -88,6 +93,12 @@ namespace MyCompiler.Visitors
                 blocks.Pop();
                 var declaration = SyntaxFactory.LocalDeclarationStatement(statement);
                 blocks.Push((currentBlock as BlockSyntax).AddStatements(declaration));
+            }
+            else if (currentBlock is MethodDeclarationSyntax)
+            {
+                blocks.Pop();
+                var declaration = SyntaxFactory.LocalDeclarationStatement(statement);
+                blocks.Push((currentBlock as MethodDeclarationSyntax).AddBodyStatements(declaration));
             }
 
             //if we forget some type of block, we will get an exception
@@ -276,6 +287,36 @@ namespace MyCompiler.Visitors
                 var block = blocks.Pop();
                 AddStatementToCurrentBlock(GetNodeWithAnnotation(block, node.Location) as BlockSyntax);
             }
+        }
+
+        public override void VisitDefineFunctionNode(DefineFunctionNode node)
+        {
+            TypeSyntax returnType = node.ReturnType.Name == "void"
+                ? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword))
+                : SyntaxFactory.ParseTypeName(node.ReturnType.Name);
+            returnType = GetNodeWithAnnotation(returnType, node.ReturnType.Location) as TypeSyntax;
+
+            var functionNode = SyntaxFactory.MethodDeclaration(returnType, node.ID.Text)
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
+
+            node.Arguments.ForEach(arg => functionNode = functionNode.AddParameterListParameters(
+                SyntaxFactory.Parameter(GetNodeWithAnnotation(SyntaxFactory.Identifier(arg.Name.Text), arg.Name.Location))
+                .WithType(GetNodeWithAnnotation(SyntaxFactory.ParseTypeName(arg.Type.Name), arg.Type.Location) as TypeSyntax)
+            ));
+
+            if (node.Body.Statements.Count == 0) //if empty function
+            {
+                functionNode = functionNode.WithBody(SyntaxFactory.Block());
+            }
+            else
+            {
+                blocks.Push(functionNode);
+                node.Body.Statements.ForEach(statement => statement.Visit(this));
+                functionNode = blocks.Pop() as MethodDeclarationSyntax;
+            }
+
+            functionNode = GetNodeWithAnnotation(functionNode, node.Location) as MethodDeclarationSyntax;
+            programClassNode = programClassNode.AddMembers(functionNode);
         }
     }
 }

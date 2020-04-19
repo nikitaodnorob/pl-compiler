@@ -18,8 +18,10 @@
     public AssignVarNode assignVarValue;
     public IDNode idValue;
     public TypeNode typeValue;
+    public DefineFunctionNode defineFuncValue;
 
     public List<AssignVarNode> defineVarsListValue;
+    public List<FunctionArgumentNode> functionArgumentsValue;
 }
 
 %using System.IO;
@@ -46,6 +48,9 @@
 %type <idValue> ident
 
 %type <defineVarsListValue> defineVarList
+%type <functionArgumentsValue> funcArgsList
+
+%type <defineFuncValue> defineFuncStmt
 
 %%
 
@@ -70,10 +75,21 @@ defineVarList   : defineVarsItem { $$ = new List<AssignVarNode> { $1 }; }
 
 assignVarStmt   : ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$); } ;
 
+funcArgsList    : type ident { $$ = new List<FunctionArgumentNode> { new FunctionArgumentNode($1, $2, @$) }; }
+                | funcArgsList COMMA type ident { $1.Add(new FunctionArgumentNode($3, $4, @$)); $$ = $1; }
+                ;
+
+defineFuncStmt  : type ident LRBRACKET funcArgsList RRBRACKET block
+                  {
+                    $$ = new DefineFunctionNode($1, $2, $4, $6, @$);
+                  }
+                ;
+
 statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineVarsStmt SEMICOLON { $$ = $1; }
                 | assignVarStmt SEMICOLON { $$ = $1; }
                 | block { $$ = $1; }
+                | defineFuncStmt { $$ = $1; }
                 ;
 
 block           : LFBRACKET RFBRACKET { $$ = new BlockNode(@$); }

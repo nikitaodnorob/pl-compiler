@@ -34,6 +34,9 @@ namespace MyCompiler.Visitors
         }
 
         public virtual void VisitDefineVarNode(DefineVarNode node) { }
+
         public virtual void VisitAssignVarNode(AssignVarNode node) { }
+
+        public virtual void VisitDefineFunctionNode(DefineFunctionNode node) { }
     }
 }

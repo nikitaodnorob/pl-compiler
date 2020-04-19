@@ -4,7 +4,7 @@ print a;
 print b;
 print c;
 
-{
-	int d = 0;
-	print d;
+void printN(int n) {
+	int res = n;
+	print res;
 }

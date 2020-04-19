@@ -90,4 +90,38 @@ namespace MyCompiler.SyntaxTree
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitAssignVarNode(this);
     }
+
+    public class FunctionArgumentNode : Node
+    {
+        public TypeNode Type { get; private set; }
+        public IDNode Name { get; private set; }
+
+        public FunctionArgumentNode(TypeNode type, IDNode name, LexLocation location) 
+        { 
+            Type = type; Name = name; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) { }
+    }
+
+    public class DefineFunctionNode : StatNode
+    {
+        public IDNode ID { get; private set; }
+        public TypeNode ReturnType { get; private set; }
+        public List<FunctionArgumentNode> Arguments { get; private set; }
+        public BlockNode Body { get; private set; }
+
+        public DefineFunctionNode(
+            TypeNode returnType,
+            IDNode id,
+            List<FunctionArgumentNode> arguments,
+            BlockNode body,
+            LexLocation location
+        )
+        {
+            ReturnType = returnType; ID = id; Arguments = arguments; Body = body; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitDefineFunctionNode(this);
+    }
 }
