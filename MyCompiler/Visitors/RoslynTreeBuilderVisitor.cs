@@ -336,5 +336,33 @@ namespace MyCompiler.Visitors
             callProcedure = GetNodeWithAnnotation(callProcedure, node.Location) as InvocationExpressionSyntax;
             AddStatementToCurrentBlock(SyntaxFactory.ExpressionStatement(callProcedure));
         }
+
+        public override void VisitCallFunctionNode(CallFunctionNode node)
+        {
+            var functionName = SyntaxFactory.IdentifierName(node.Name.Text);
+            functionName = GetNodeWithAnnotation(functionName, node.Name.Location) as IdentifierNameSyntax;
+
+            var callFunction = SyntaxFactory.InvocationExpression(functionName);
+
+            foreach (var parameter in node.Arguments)
+            {
+                parameter.Expression.Visit(this);
+                var arg = GetNodeWithAnnotation(SyntaxFactory.Argument(expressions.Pop()), parameter.Location) as ArgumentSyntax;
+                callFunction = callFunction.AddArgumentListArguments(arg);
+            }
+
+            callFunction = GetNodeWithAnnotation(callFunction, node.Location) as InvocationExpressionSyntax;
+            expressions.Push(callFunction);
+        }
+
+        public override void VisitReturnNode(ReturnNode node)
+        {
+            node.Expression.Visit(this);
+
+            var @return = SyntaxFactory.ReturnStatement(expressions.Pop());
+            @return = GetNodeWithAnnotation(@return, node.Location) as ReturnStatementSyntax;
+
+            AddStatementToCurrentBlock(@return);
+        }
     }
 }

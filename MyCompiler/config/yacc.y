@@ -20,6 +20,8 @@
     public TypeNode typeValue;
     public DefineFunctionNode defineFuncValue;
     public CallProcedureNode callProcValue;
+    public CallFunctionNode callFuncValue;
+    public ReturnNode returnValue;
 
     public List<AssignVarNode> defineVarsListValue;
     public List<DefineFunctionArgumentNode> defineFuncArgumentsValue;
@@ -31,7 +33,7 @@
 
 %namespace MyCompiler
 
-%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET
+%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN
 %token ASSIGNEQ
 
 %token <iValue> INTNUM
@@ -55,6 +57,8 @@
 
 %type <defineFuncValue> defineFuncStmt
 %type <callProcValue> callFuncStmt
+%type <callFuncValue> callFuncExpr
+%type <returnValue> return
 
 %%
 
@@ -95,12 +99,17 @@ defineFuncStmt  : type ident LRBRACKET defFuncArgList RRBRACKET block
 
 callFuncStmt    : ident LRBRACKET callFuncArgList RRBRACKET { $$ = new CallProcedureNode($1, $3, @$); } ;
 
+callFuncExpr    : ident LRBRACKET callFuncArgList RRBRACKET { $$ = new CallFunctionNode($1, $3, @$); } ;
+
+return          : RETURN expression { $$ = new ReturnNode($2, @$); } ;
+
 statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineVarsStmt SEMICOLON { $$ = $1; }
                 | assignVarStmt SEMICOLON { $$ = $1; }
                 | block { $$ = $1; }
                 | defineFuncStmt { $$ = $1; }
                 | callFuncStmt SEMICOLON { $$ = $1; }
+                | return SEMICOLON { $$ = $1; }
                 ;
 
 block           : LFBRACKET RFBRACKET { $$ = new BlockNode(@$); }
@@ -114,6 +123,7 @@ statementsList  : statement { $$ = new BlockNode($1, @$); }
 expression      : INTNUM { $$ = new IntNumNode($1, @$); }
                 | REALNUM { $$ = new RealNumNode($1, @$); }
                 | ident { $$ = $1; }
+                | callFuncExpr { $$ = $1; }
                 ;
 
 %%

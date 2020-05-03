@@ -149,4 +149,26 @@ namespace MyCompiler.SyntaxTree
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitCallProcedureNode(this);
     }
+
+    public class CallFunctionNode : ExprNode
+    {
+        public IDNode Name { get; private set; }
+        public List<CallFunctionArgumentNode> Arguments { get; private set; }
+
+        public CallFunctionNode(IDNode name, List<CallFunctionArgumentNode> arguments, LexLocation location)
+        {
+            Name = name; Arguments = arguments; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitCallFunctionNode(this);
+    }
+
+    public class ReturnNode : StatNode
+    {
+        public ExprNode Expression { get; private set; }
+
+        public ReturnNode(ExprNode expr, LexLocation location) { Expression = expr; Location = location; }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitReturnNode(this);
+    }
 }

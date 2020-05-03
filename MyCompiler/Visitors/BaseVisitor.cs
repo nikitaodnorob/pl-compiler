@@ -40,5 +40,9 @@ namespace MyCompiler.Visitors
         public virtual void VisitDefineFunctionNode(DefineFunctionNode node) { }
 
         public virtual void VisitCallProcedureNode(CallProcedureNode node) { }
+
+        public virtual void VisitCallFunctionNode(CallFunctionNode node) { }
+
+        public virtual void VisitReturnNode(ReturnNode node) { }
     }
 }

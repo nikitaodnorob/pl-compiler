@@ -10,3 +10,9 @@ void printN(int n) {
 }
 
 printN(1000);
+
+int first(int a, int b) {
+	return a;
+}
+
+print first(100, 200);
