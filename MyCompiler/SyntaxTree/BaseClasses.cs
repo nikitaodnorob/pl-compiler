@@ -23,7 +23,10 @@ namespace MyCompiler.SyntaxTree
     /// <summary>
     /// Basic class of any expressions
     /// </summary>
-    public abstract class ExprNode : Node { }
+    public abstract class ExprNode : Node 
+    {
+        public bool IsInParens { get; set; } = false;
+    }
 
     /// <summary>
     /// Basic class of any statements

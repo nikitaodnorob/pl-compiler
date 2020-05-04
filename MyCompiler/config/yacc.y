@@ -41,7 +41,7 @@
 %token <dValue> REALNUM
 %token <sValue> ID
 
-%type <exprValue> expression expr2
+%type <exprValue> expression expr2 expr3
 %type <statValue> statement
 
 %type <blockValue> statementsList block
@@ -126,10 +126,17 @@ expression      : expression PLUS expr2 { $$ = new BinaryExpressionNode($1, $3, 
                 | expr2 { $$ = $1; }
                 ;
 
-expr2           : INTNUM { $$ = new IntNumNode($1, @$); }
+expr2           : expr2 MUL expr3 { $$ = new BinaryExpressionNode($1, $3, "*", @$); }
+                | expr2 DIV expr3 { $$ = new BinaryExpressionNode($1, $3, "/", @$); }
+                | expr2 MOD expr3 { $$ = new BinaryExpressionNode($1, $3, "%", @$); }
+                | expr3 { $$ = $1; }
+                ;
+
+expr3           : INTNUM { $$ = new IntNumNode($1, @$); }
                 | REALNUM { $$ = new RealNumNode($1, @$); }
                 | ident { $$ = $1; }
                 | callFuncExpr { $$ = $1; }
+                | LRBRACKET expression RRBRACKET { $2.IsInParens = true; $$ = $2; }
                 ;
 
 %%

@@ -376,12 +376,21 @@ namespace MyCompiler.Visitors
                 "%" => SyntaxKind.ModuloExpression,
                 _ => throw new Exception($"forgot syntax kind for expression '{node.Operator}'"),
             };
-            node.Left.Visit(this);
             node.Right.Visit(this);
+            node.Left.Visit(this);
 
             var expression = SyntaxFactory.BinaryExpression(operationKind, expressions.Pop(), expressions.Pop());
-            expression = GetNodeWithAnnotation(expression, node.Location) as BinaryExpressionSyntax;
-            expressions.Push(expression);
+            if (!node.IsInParens)
+            {
+                expression = GetNodeWithAnnotation(expression, node.Location) as BinaryExpressionSyntax;
+                expressions.Push(expression);
+            }
+            else
+            {
+                var parenExpression = SyntaxFactory.ParenthesizedExpression(expression);
+                parenExpression = GetNodeWithAnnotation(parenExpression, node.Location) as ParenthesizedExpressionSyntax;
+                expressions.Push(parenExpression);
+            }
         }
     }
 }
