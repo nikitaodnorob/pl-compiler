@@ -86,10 +86,12 @@ assignVarStmt   : ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$)
 
 defFuncArgList  : type ident { $$ = new List<DefineFunctionArgumentNode> { new DefineFunctionArgumentNode($1, $2, @$) }; }
                 | defFuncArgList COMMA type ident { $1.Add(new DefineFunctionArgumentNode($3, $4, @$)); $$ = $1; }
+                | { $$ = new List<DefineFunctionArgumentNode> { }; }
                 ;
 
 callFuncArgList : expression { $$ = new List<CallFunctionArgumentNode> { new CallFunctionArgumentNode($1, @$) }; }
                 | callFuncArgList COMMA expression { $1.Add(new CallFunctionArgumentNode($3, @$)); $$ = $1; }
+                | { $$ = new List<CallFunctionArgumentNode> { }; }
                 ;
 
 defineFuncStmt  : type ident LRBRACKET defFuncArgList RRBRACKET block
