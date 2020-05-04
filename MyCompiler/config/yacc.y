@@ -35,12 +35,13 @@
 
 %token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN
 %token ASSIGNEQ
+%token PLUS MINUS MUL DIV MOD
 
 %token <iValue> INTNUM
 %token <dValue> REALNUM
 %token <sValue> ID
 
-%type <exprValue> expression
+%type <exprValue> expression expr2
 %type <statValue> statement
 
 %type <blockValue> statementsList block
@@ -120,7 +121,12 @@ statementsList  : statement { $$ = new BlockNode($1, @$); }
                 | statementsList statement { $1.AddStatement($2); $$ = $1; }
                 ;
 
-expression      : INTNUM { $$ = new IntNumNode($1, @$); }
+expression      : expression PLUS expr2 { $$ = new BinaryExpressionNode($1, $3, "+", @$); }
+                | expression MINUS expr2 { $$ = new BinaryExpressionNode($1, $3, "-", @$); }
+                | expr2 { $$ = $1; }
+                ;
+
+expr2           : INTNUM { $$ = new IntNumNode($1, @$); }
                 | REALNUM { $$ = new RealNumNode($1, @$); }
                 | ident { $$ = $1; }
                 | callFuncExpr { $$ = $1; }

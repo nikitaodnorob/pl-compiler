@@ -35,6 +35,11 @@ ID			{Alpha}{AlphaDigit}*
 "=" { return (int)Tokens.ASSIGNEQ; }
 "{" { return (int)Tokens.LFBRACKET; }
 "}" { return (int)Tokens.RFBRACKET; }
+"+" { return (int)Tokens.PLUS; }
+"-" { return (int)Tokens.MINUS; }
+"*" { return (int)Tokens.MUL; }
+"/" { return (int)Tokens.DIV; }
+"%" { return (int)Tokens.MOD; }
 
 [^ \r\n\t] {
 	LexError();

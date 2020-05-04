@@ -171,4 +171,18 @@ namespace MyCompiler.SyntaxTree
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitReturnNode(this);
     }
+
+    public class BinaryExpressionNode : ExprNode
+    {
+        public ExprNode Left { get; private set; }
+        public ExprNode Right { get; private set; }
+        public string Operator { get; private set; }
+
+        public BinaryExpressionNode(ExprNode left, ExprNode right, string op, LexLocation location)
+        {
+            Left = left; Right = right; Operator = op; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitBinaryExpressionNode(this);
+    }
 }

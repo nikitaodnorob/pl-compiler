@@ -16,3 +16,5 @@ int first(int a, int b) {
 }
 
 print first(100, 200);
+
+print 666 + 100;

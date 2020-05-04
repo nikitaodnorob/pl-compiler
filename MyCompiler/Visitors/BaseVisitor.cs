@@ -44,5 +44,7 @@ namespace MyCompiler.Visitors
         public virtual void VisitCallFunctionNode(CallFunctionNode node) { }
 
         public virtual void VisitReturnNode(ReturnNode node) { }
+
+        public virtual void VisitBinaryExpressionNode(BinaryExpressionNode node) { }
     }
 }

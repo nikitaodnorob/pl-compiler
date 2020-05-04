@@ -364,5 +364,24 @@ namespace MyCompiler.Visitors
 
             AddStatementToCurrentBlock(@return);
         }
+
+        public override void VisitBinaryExpressionNode(BinaryExpressionNode node)
+        {
+            var operationKind = node.Operator switch
+            {
+                "+" => SyntaxKind.AddExpression,
+                "-" => SyntaxKind.SubtractExpression,
+                "*" => SyntaxKind.MultiplyExpression,
+                "/" => SyntaxKind.DivideExpression,
+                "%" => SyntaxKind.ModuloExpression,
+                _ => throw new Exception($"forgot syntax kind for expression '{node.Operator}'"),
+            };
+            node.Left.Visit(this);
+            node.Right.Visit(this);
+
+            var expression = SyntaxFactory.BinaryExpression(operationKind, expressions.Pop(), expressions.Pop());
+            expression = GetNodeWithAnnotation(expression, node.Location) as BinaryExpressionSyntax;
+            expressions.Push(expression);
+        }
     }
 }
