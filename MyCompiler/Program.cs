@@ -57,9 +57,8 @@ namespace MyCompiler
         static void GenerateRuntimeConfig(string configPath)
         {
             string netCoreVersion = "3.1.3";
-            using (StreamWriter sw = new StreamWriter(configPath))
-            {
-                sw.WriteLine(
+            using StreamWriter sw = new StreamWriter(configPath);
+            sw.WriteLine(
 @"{
     ""runtimeOptions"": {
         ""tfm"": ""netcoreapp3.0"",
@@ -69,14 +68,13 @@ namespace MyCompiler
         }
     }
 }");
-            }
         }
 
         /// <summary>
         /// Compile the program which is setted by syntax tree
         /// </summary>
         /// <param name="syntaxTree">Syntax tree</param>
-        static void Compile(Node syntaxTree)
+        static void Compile(Node syntaxTree, string outputFileName)
         {
             //initialize visitor
             RoslynTreeBuilderVisitor visitor = new RoslynTreeBuilderVisitor();
@@ -110,10 +108,11 @@ namespace MyCompiler
                 )
             );
 
-            GenerateRuntimeConfig("../../../out/program.runtimeconfig.json"); //generate runtime config
+            string configPath = Path.GetDirectoryName(outputFileName) + "/" + Path.GetFileNameWithoutExtension(outputFileName) + ".runtimeconfig.json";
+            GenerateRuntimeConfig(configPath); //generate runtime config
 
-            //generate program to "program.exe" file
-            using (var exeStream = new FileStream("../../../out/program.exe", FileMode.Create))
+            //generate program to file
+            using (var exeStream = new FileStream(outputFileName, FileMode.Create))
             {
                 var emitResult = compilation.Emit(exeStream); //compile
 
@@ -130,8 +129,8 @@ namespace MyCompiler
             }
 
             //print C# source code which matches to builded Roslyn's syntax tree
-            Console.WriteLine("========== SOURCE CODE ==========");
-            Console.WriteLine(programUnit.NormalizeWhitespace().ToFullString());
+            //Console.WriteLine("========== SOURCE CODE ==========");
+            //Console.WriteLine(programUnit.NormalizeWhitespace().ToFullString());
         }
 
         static void Main(string[] args)
@@ -139,7 +138,11 @@ namespace MyCompiler
             //set culture for correct double values parsing
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
-            string sourceCode = File.ReadAllText("../../../program.mylang");
+            //get parameters of command line
+            string sourceFileName = args.Length > 0 ? args[0] : "../../../program.mylang";
+            string outputFileName = args.Length > 1 ? args[1] : "../../../out/program.exe";
+
+            string sourceCode = File.ReadAllText(sourceFileName);
 
             //lexical analysis
             Scanner scanner = new Scanner();
@@ -152,7 +155,7 @@ namespace MyCompiler
             if (isCorrect) //if program was parsed successfully
             {
                 Node syntaxTree = parser.Root; //get program's syntax tree
-                Compile(syntaxTree); //compile the program
+                Compile(syntaxTree, outputFileName); //compile the program
             }
         }
     }
