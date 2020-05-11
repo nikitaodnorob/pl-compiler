@@ -11,6 +11,8 @@ using QUT.Gppg;
 
 namespace MyCompiler.Visitors
 {
+    using static SyntaxFactory;
+
     class RoslynTreeBuilderVisitor : BaseVisitor
     {
         /// <summary>
@@ -36,13 +38,13 @@ namespace MyCompiler.Visitors
 
             foreach (var identifier in usingName.Split('.'))
             {
-                var name = SyntaxFactory.IdentifierName(identifier);
+                var name = IdentifierName(identifier);
 
-                if (qualifiedName != null) qualifiedName = SyntaxFactory.QualifiedName(qualifiedName, name);
+                if (qualifiedName != null) qualifiedName = QualifiedName(qualifiedName, name);
                 else qualifiedName = name;
             }
 
-            return SyntaxFactory.UsingDirective(qualifiedName);
+            return UsingDirective(qualifiedName);
         }
 
         /// <summary>
@@ -84,20 +86,20 @@ namespace MyCompiler.Visitors
             //if statement isn't in any block, it's need to add the statement to Main method in C#
             if (currentBlock is MethodDeclarationSyntax && (currentBlock as MethodDeclarationSyntax).Identifier.Text == "Main")
             {
-                var declaration = SyntaxFactory.FieldDeclaration(statement);
-                declaration = declaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
+                var declaration = FieldDeclaration(statement);
+                declaration = declaration.AddModifiers(Token(SyntaxKind.StaticKeyword));
                 programClassNode = programClassNode.AddMembers(declaration);
             }
             else if (currentBlock is BlockSyntax)
             {
                 blocks.Pop();
-                var declaration = SyntaxFactory.LocalDeclarationStatement(statement);
+                var declaration = LocalDeclarationStatement(statement);
                 blocks.Push((currentBlock as BlockSyntax).AddStatements(declaration));
             }
             else if (currentBlock is MethodDeclarationSyntax)
             {
                 blocks.Pop();
-                var declaration = SyntaxFactory.LocalDeclarationStatement(statement);
+                var declaration = LocalDeclarationStatement(statement);
                 blocks.Push((currentBlock as MethodDeclarationSyntax).AddBodyStatements(declaration));
             }
 
@@ -136,9 +138,8 @@ namespace MyCompiler.Visitors
                 programClassNode = programClassNode.AddMembers(mainMethodNode);
 
                 //declare namespace and add the class into it 
-                NamespaceDeclarationSyntax namespaceNode = SyntaxFactory
-                    .NamespaceDeclaration(SyntaxFactory.IdentifierName("RoslynApp"))
-                    .AddMembers(programClassNode);
+                NamespaceDeclarationSyntax namespaceNode = 
+                    NamespaceDeclaration(IdentifierName("RoslynApp")).AddMembers(programClassNode);
 
                 //add namespace into unit 
                 unitNode = unitNode.AddMembers(namespaceNode);
@@ -154,23 +155,19 @@ namespace MyCompiler.Visitors
         public RoslynTreeBuilderVisitor()
         {
             //Create unit and add using "System"
-            unitNode = SyntaxFactory.CompilationUnit().AddUsings(
+            unitNode = CompilationUnit().AddUsings(
                 CreateUsingDirective("System")
             );
 
             //Create public class "Program"
-            programClassNode = SyntaxFactory
-                    .ClassDeclaration("Program")
-                    .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
+            programClassNode = ClassDeclaration("Program")
+                .AddModifiers(Token(SyntaxKind.PublicKeyword));
 
             //Create method void Main() 
-            mainMethodNode = SyntaxFactory.MethodDeclaration(
-                SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-                "Main"
-            );
+            mainMethodNode = MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)), "Main");
 
             //Set Main method as static
-            mainMethodNode = mainMethodNode.AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
+            mainMethodNode = mainMethodNode.AddModifiers(Token(SyntaxKind.StaticKeyword));
 
             //Add to Main method empty body
             mainMethodNode = mainMethodNode.AddBodyStatements();
@@ -204,28 +201,28 @@ namespace MyCompiler.Visitors
 
         public override void VisitIntNumNode(IntNumNode node)
         {
-            var literal = SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Value));
+            var literal = LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(node.Value));
             literal = GetNodeWithAnnotation(literal, node.Location) as LiteralExpressionSyntax;
             expressions.Push(literal);
         }
 
         public override void VisitRealNumNode(RealNumNode node)
         {
-            var literal = SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(node.Value));
+            var literal = LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(node.Value));
             literal = GetNodeWithAnnotation(literal, node.Location) as LiteralExpressionSyntax;
             expressions.Push(literal);
         }
 
         public override void VisitIDNode(IDNode node)
         {
-            var identifer = SyntaxFactory.IdentifierName(node.Text);
+            var identifer = IdentifierName(node.Text);
             identifer = GetNodeWithAnnotation(identifer, node.Location) as IdentifierNameSyntax;
             expressions.Push(identifer);
         }
 
         public override void VisitTypeNode(TypeNode node)
         {
-            var type = SyntaxFactory.ParseTypeName(node.Name);
+            var type = ParseTypeName(node.Name);
             type = GetNodeWithAnnotation(type, node.Location) as TypeSyntax;
             expressions.Push(type);
         }
@@ -235,12 +232,12 @@ namespace MyCompiler.Visitors
             node.Expression.Visit(this);
 
             //"print" operation in my language is Console.WriteLine method call
-            var printClassName = SyntaxFactory.IdentifierName("Console");
-            var printMethodName = SyntaxFactory.IdentifierName("WriteLine");
-            var printStatement = SyntaxFactory.ExpressionStatement(
-                SyntaxFactory.InvocationExpression(
-                    SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, printClassName, printMethodName)
-                ).AddArgumentListArguments(SyntaxFactory.Argument(expressions.Pop()))
+            var printClassName = IdentifierName("Console");
+            var printMethodName = IdentifierName("WriteLine");
+            var printStatement = ExpressionStatement(
+                InvocationExpression(
+                    MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, printClassName, printMethodName)
+                ).AddArgumentListArguments(Argument(expressions.Pop()))
             );
             AddStatementToCurrentBlock(printStatement);
         }
@@ -250,18 +247,18 @@ namespace MyCompiler.Visitors
             node.Type.Visit(this);
             var type = expressions.Pop();
 
-            var defineVar = SyntaxFactory.VariableDeclaration(type as TypeSyntax);
+            var defineVar = VariableDeclaration(type as TypeSyntax);
 
             foreach (var variable in node.Variables)
             {
                 variable.Expression?.Visit(this);
 
-                var id = SyntaxFactory.IdentifierName(variable.ID.Text);
+                var id = IdentifierName(variable.ID.Text);
                 id = GetNodeWithAnnotation(id, variable.ID.Location) as IdentifierNameSyntax;
 
                 var identifer = GetNodeWithAnnotation(id.Identifier, variable.ID.Location);
-                var variableNode = SyntaxFactory.VariableDeclarator(identifer);
-                if (variable.Expression != null) variableNode = variableNode.WithInitializer(SyntaxFactory.EqualsValueClause(expressions.Pop()));
+                var variableNode = VariableDeclarator(identifer);
+                if (variable.Expression != null) variableNode = variableNode.WithInitializer(EqualsValueClause(expressions.Pop()));
                 variableNode = GetNodeWithAnnotation(variableNode, variable.Location) as VariableDeclaratorSyntax;
 
                 defineVar = defineVar.AddVariables(variableNode);
@@ -278,15 +275,15 @@ namespace MyCompiler.Visitors
             node.ID.Visit(this);
 
             var kindAssigment = SyntaxKind.SimpleAssignmentExpression;
-            var assignVar = SyntaxFactory.AssignmentExpression(kindAssigment, expressions.Pop(), expressions.Pop());
+            var assignVar = AssignmentExpression(kindAssigment, expressions.Pop(), expressions.Pop());
             assignVar = GetNodeWithAnnotation(assignVar, node.Location) as AssignmentExpressionSyntax;
 
-            AddStatementToCurrentBlock(SyntaxFactory.ExpressionStatement(assignVar));
+            AddStatementToCurrentBlock(ExpressionStatement(assignVar));
         }
 
         public override void VisitBlockNode(BlockNode node)
         {
-            if (!node.IsMainBlock) blocks.Push(SyntaxFactory.Block());
+            if (!node.IsMainBlock) blocks.Push(Block());
             node.Statements.ForEach(statement => statement.Visit(this));
             if (!node.IsMainBlock) {
                 var block = blocks.Pop();
@@ -297,21 +294,21 @@ namespace MyCompiler.Visitors
         public override void VisitDefineFunctionNode(DefineFunctionNode node)
         {
             TypeSyntax returnType = node.ReturnType.Name == "void"
-                ? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword))
-                : SyntaxFactory.ParseTypeName(node.ReturnType.Name);
+                ? PredefinedType(Token(SyntaxKind.VoidKeyword))
+                : ParseTypeName(node.ReturnType.Name);
             returnType = GetNodeWithAnnotation(returnType, node.ReturnType.Location) as TypeSyntax;
 
-            var defineFunction = SyntaxFactory.MethodDeclaration(returnType, node.ID.Text)
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.StaticKeyword));
+            var defineFunction = MethodDeclaration(returnType, node.ID.Text)
+                .AddModifiers(Token(SyntaxKind.StaticKeyword));
 
             node.Arguments.ForEach(arg => defineFunction = defineFunction.AddParameterListParameters(
-                SyntaxFactory.Parameter(GetNodeWithAnnotation(SyntaxFactory.Identifier(arg.Name.Text), arg.Name.Location))
-                .WithType(GetNodeWithAnnotation(SyntaxFactory.ParseTypeName(arg.Type.Name), arg.Type.Location) as TypeSyntax)
+                Parameter(GetNodeWithAnnotation(Identifier(arg.Name.Text), arg.Name.Location))
+                .WithType(GetNodeWithAnnotation(ParseTypeName(arg.Type.Name), arg.Type.Location) as TypeSyntax)
             ));
 
             if (node.Body.Statements.Count == 0) //if empty function
             {
-                defineFunction = defineFunction.WithBody(SyntaxFactory.Block());
+                defineFunction = defineFunction.WithBody(Block());
             }
             else
             {
@@ -326,33 +323,33 @@ namespace MyCompiler.Visitors
 
         public override void VisitCallProcedureNode(CallProcedureNode node)
         {
-            var procedureName = SyntaxFactory.IdentifierName(node.Name.Text);
+            var procedureName = IdentifierName(node.Name.Text);
             procedureName = GetNodeWithAnnotation(procedureName, node.Name.Location) as IdentifierNameSyntax;
 
-            var callProcedure = SyntaxFactory.InvocationExpression(procedureName);
+            var callProcedure = InvocationExpression(procedureName);
 
             foreach (var parameter in node.Arguments)
             {
                 parameter.Expression.Visit(this);
-                var arg = GetNodeWithAnnotation(SyntaxFactory.Argument(expressions.Pop()), parameter.Location) as ArgumentSyntax;
+                var arg = GetNodeWithAnnotation(Argument(expressions.Pop()), parameter.Location) as ArgumentSyntax;
                 callProcedure = callProcedure.AddArgumentListArguments(arg);
             }
 
             callProcedure = GetNodeWithAnnotation(callProcedure, node.Location) as InvocationExpressionSyntax;
-            AddStatementToCurrentBlock(SyntaxFactory.ExpressionStatement(callProcedure));
+            AddStatementToCurrentBlock(ExpressionStatement(callProcedure));
         }
 
         public override void VisitCallFunctionNode(CallFunctionNode node)
         {
-            var functionName = SyntaxFactory.IdentifierName(node.Name.Text);
+            var functionName = IdentifierName(node.Name.Text);
             functionName = GetNodeWithAnnotation(functionName, node.Name.Location) as IdentifierNameSyntax;
 
-            var callFunction = SyntaxFactory.InvocationExpression(functionName);
+            var callFunction = InvocationExpression(functionName);
 
             foreach (var parameter in node.Arguments)
             {
                 parameter.Expression.Visit(this);
-                var arg = GetNodeWithAnnotation(SyntaxFactory.Argument(expressions.Pop()), parameter.Location) as ArgumentSyntax;
+                var arg = GetNodeWithAnnotation(Argument(expressions.Pop()), parameter.Location) as ArgumentSyntax;
                 callFunction = callFunction.AddArgumentListArguments(arg);
             }
 
@@ -364,7 +361,7 @@ namespace MyCompiler.Visitors
         {
             node.Expression.Visit(this);
 
-            var @return = SyntaxFactory.ReturnStatement(expressions.Pop());
+            var @return = ReturnStatement(expressions.Pop());
             @return = GetNodeWithAnnotation(@return, node.Location) as ReturnStatementSyntax;
 
             AddStatementToCurrentBlock(@return);
@@ -384,7 +381,7 @@ namespace MyCompiler.Visitors
             node.Right.Visit(this);
             node.Left.Visit(this);
 
-            var expression = SyntaxFactory.BinaryExpression(operationKind, expressions.Pop(), expressions.Pop());
+            var expression = BinaryExpression(operationKind, expressions.Pop(), expressions.Pop());
             if (!node.IsInParens)
             {
                 expression = GetNodeWithAnnotation(expression, node.Location) as BinaryExpressionSyntax;
@@ -392,7 +389,7 @@ namespace MyCompiler.Visitors
             }
             else
             {
-                var parenExpression = SyntaxFactory.ParenthesizedExpression(expression);
+                var parenExpression = ParenthesizedExpression(expression);
                 parenExpression = GetNodeWithAnnotation(parenExpression, node.Location) as ParenthesizedExpressionSyntax;
                 expressions.Push(parenExpression);
             }
@@ -405,30 +402,25 @@ namespace MyCompiler.Visitors
             countExpr = GetNodeWithAnnotation(countExpr, node.Count.Location) as ExpressionSyntax;
 
             string countVarName = "#loop" + ++loopCountInd;
-            var count = SyntaxFactory
-                .VariableDeclaration(SyntaxFactory.ParseTypeName("long"))
-                .AddVariables(
-                    SyntaxFactory
-                    .VariableDeclarator(countVarName)
-                    .WithInitializer(SyntaxFactory.EqualsValueClause(
-                        SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))
-                    )
+            var count = VariableDeclaration(ParseTypeName("long"))
+                .AddVariables(VariableDeclarator(countVarName)
+                    .WithInitializer(EqualsValueClause(LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(0))))
                 );
             AddVariableToCurrentBlock(count);
 
-            blocks.Push(SyntaxFactory.Block());
+            blocks.Push(Block());
             if (node.Statement is BlockNode) (node.Statement as BlockNode).Statements.ForEach(st => st.Visit(this));
             else node.Statement.Visit(this);
 
-            var increment = SyntaxFactory.ExpressionStatement(SyntaxFactory.PrefixUnaryExpression(
+            var increment = ExpressionStatement(PrefixUnaryExpression(
                 SyntaxKind.PreIncrementExpression,
-                SyntaxFactory.IdentifierName(countVarName)
+                IdentifierName(countVarName)
             ));
             AddStatementToCurrentBlock(increment);
 
             var whileBlock = blocks.Pop() as BlockSyntax;
-            var whileNode = SyntaxFactory.WhileStatement(
-                SyntaxFactory.BinaryExpression(SyntaxKind.LessThanExpression, SyntaxFactory.IdentifierName(countVarName), countExpr),
+            var whileNode = WhileStatement(
+                BinaryExpression(SyntaxKind.LessThanExpression, IdentifierName(countVarName), countExpr),
                 whileBlock
             );
             AddStatementToCurrentBlock(whileNode);
