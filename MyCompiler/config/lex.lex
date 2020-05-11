@@ -70,6 +70,7 @@ static class LexerHelper
         keywords = new Dictionary<string,int>();
         keywords.Add("print", (int)Tokens.PRINT);
         keywords.Add("return", (int)Tokens.RETURN);
+        keywords.Add("loop", (int)Tokens.LOOP);
     }
 
     public static int GetIDToken(string s) => keywords.ContainsKey(s) ? keywords[s] : (int)Tokens.ID;

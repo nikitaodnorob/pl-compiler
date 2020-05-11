@@ -185,4 +185,17 @@ namespace MyCompiler.SyntaxTree
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitBinaryExpressionNode(this);
     }
+
+    public class LoopNode : StatNode
+    {
+        public ExprNode Count { get; private set; }
+        public StatNode Statement { get; private set; }
+
+        public LoopNode(ExprNode count, StatNode stat, LexLocation location)
+        {
+            Count = count; Statement = stat; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitLoopNode(this);
+    }
 }

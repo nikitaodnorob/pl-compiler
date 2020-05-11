@@ -22,6 +22,7 @@
     public CallProcedureNode callProcValue;
     public CallFunctionNode callFuncValue;
     public ReturnNode returnValue;
+    public LoopNode loopValue;
 
     public List<AssignVarNode> defineVarsListValue;
     public List<DefineFunctionArgumentNode> defineFuncArgumentsValue;
@@ -33,7 +34,7 @@
 
 %namespace MyCompiler
 
-%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN
+%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN LOOP
 %token ASSIGNEQ
 %token PLUS MINUS MUL DIV MOD
 
@@ -60,6 +61,7 @@
 %type <callProcValue> callFuncStmt
 %type <callFuncValue> callFuncExpr
 %type <returnValue> return
+%type <loopValue> loop
 
 %%
 
@@ -106,6 +108,8 @@ callFuncExpr    : ident LRBRACKET callFuncArgList RRBRACKET { $$ = new CallFunct
 
 return          : RETURN expression { $$ = new ReturnNode($2, @$); } ;
 
+loop            : LOOP expression statement { $$ = new LoopNode($2, $3, @$); } ;
+
 statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineVarsStmt SEMICOLON { $$ = $1; }
                 | assignVarStmt SEMICOLON { $$ = $1; }
@@ -113,6 +117,7 @@ statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineFuncStmt { $$ = $1; }
                 | callFuncStmt SEMICOLON { $$ = $1; }
                 | return SEMICOLON { $$ = $1; }
+                | loop { $$ = $1; }
                 ;
 
 block           : LFBRACKET RFBRACKET { $$ = new BlockNode(@$); }

@@ -106,6 +106,11 @@ namespace MyCompiler.Visitors
         }
 
         /// <summary>
+        /// Index of service variable '#loop{id}' for loop cycle
+        /// </summary>
+        private int loopCountInd = 0;
+
+        /// <summary>
         /// Node of C# unit which contains all classes
         /// </summary>
         private CompilationUnitSyntax unitNode;
@@ -391,6 +396,42 @@ namespace MyCompiler.Visitors
                 parenExpression = GetNodeWithAnnotation(parenExpression, node.Location) as ParenthesizedExpressionSyntax;
                 expressions.Push(parenExpression);
             }
+        }
+
+        public override void VisitLoopNode(LoopNode node)
+        {
+            node.Count.Visit(this);
+            var countExpr = expressions.Pop();
+            countExpr = GetNodeWithAnnotation(countExpr, node.Count.Location) as ExpressionSyntax;
+
+            string countVarName = "#loop" + ++loopCountInd;
+            var count = SyntaxFactory
+                .VariableDeclaration(SyntaxFactory.ParseTypeName("long"))
+                .AddVariables(
+                    SyntaxFactory
+                    .VariableDeclarator(countVarName)
+                    .WithInitializer(SyntaxFactory.EqualsValueClause(
+                        SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0)))
+                    )
+                );
+            AddVariableToCurrentBlock(count);
+
+            blocks.Push(SyntaxFactory.Block());
+            if (node.Statement is BlockNode) (node.Statement as BlockNode).Statements.ForEach(st => st.Visit(this));
+            else node.Statement.Visit(this);
+
+            var increment = SyntaxFactory.ExpressionStatement(SyntaxFactory.PrefixUnaryExpression(
+                SyntaxKind.PreIncrementExpression,
+                SyntaxFactory.IdentifierName(countVarName)
+            ));
+            AddStatementToCurrentBlock(increment);
+
+            var whileBlock = blocks.Pop() as BlockSyntax;
+            var whileNode = SyntaxFactory.WhileStatement(
+                SyntaxFactory.BinaryExpression(SyntaxKind.LessThanExpression, SyntaxFactory.IdentifierName(countVarName), countExpr),
+                whileBlock
+            );
+            AddStatementToCurrentBlock(whileNode);
         }
     }
 }
