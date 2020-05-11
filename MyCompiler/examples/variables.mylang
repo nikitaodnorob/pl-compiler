@@ -1,0 +1,14 @@
+﻿int a, b = 2, c = 3;
+a = 1;
+print a;
+print b;
+print c;
+
+{
+	int a = 4;
+	print a;
+	{
+		double a = 5;
+		print a;
+	}
+}
