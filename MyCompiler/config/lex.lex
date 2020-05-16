@@ -40,6 +40,7 @@ ID			{Alpha}{AlphaDigit}*
 "*" { return (int)Tokens.MUL; }
 "/" { return (int)Tokens.DIV; }
 "%" { return (int)Tokens.MOD; }
+"." { return (int)Tokens.DOT; }
 
 [^ \r\n\t] {
 	LexError();

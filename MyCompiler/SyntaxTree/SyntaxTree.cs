@@ -35,11 +35,25 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) => visitor.VisitIDNode(this);
     }
 
+    public class ComplexIDNode : IDNode
+    {
+        public IDNode SourceObject { get; private set; }
+        public IDNode Member { get; private set; }
+
+        public ComplexIDNode(IDNode obj, IDNode member, LexLocation location)
+            : base(member != null ? obj.Text + '.' + member.Text : obj.Text, location)
+        {
+            SourceObject = obj; Member = member;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitComplexIDNode(this);
+    }
+
     public class TypeNode : Node
     {
-        public string Name { get; private set; }
+        public IDNode ID { get; private set; }
 
-        public TypeNode(string name, LexLocation location) { Name = name; Location = location; }
+        public TypeNode(IDNode id, LexLocation location) { ID = id; Location = location; }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitTypeNode(this);
     }

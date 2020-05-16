@@ -220,9 +220,26 @@ namespace MyCompiler.Visitors
             expressions.Push(identifer);
         }
 
+        public override void VisitComplexIDNode(ComplexIDNode node)
+        {
+            if (node.Member == null) VisitIDNode(node);
+            else
+            {
+                node.Member.Visit(this);
+                node.SourceObject.Visit(this);
+                var memberAccess = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression, 
+                    expressions.Pop(), 
+                    expressions.Pop() as IdentifierNameSyntax
+                );
+                memberAccess = GetNodeWithAnnotation(memberAccess, node.Location) as MemberAccessExpressionSyntax;
+                expressions.Push(memberAccess);
+            }
+        }
+
         public override void VisitTypeNode(TypeNode node)
         {
-            var type = ParseTypeName(node.Name);
+            var type = ParseTypeName(node.ID.Text);
             type = GetNodeWithAnnotation(type, node.Location) as TypeSyntax;
             expressions.Push(type);
         }
@@ -293,9 +310,9 @@ namespace MyCompiler.Visitors
 
         public override void VisitDefineFunctionNode(DefineFunctionNode node)
         {
-            TypeSyntax returnType = node.ReturnType.Name == "void"
+            TypeSyntax returnType = node.ReturnType.ID.Text == "void"
                 ? PredefinedType(Token(SyntaxKind.VoidKeyword))
-                : ParseTypeName(node.ReturnType.Name);
+                : ParseTypeName(node.ReturnType.ID.Text);
             returnType = GetNodeWithAnnotation(returnType, node.ReturnType.Location) as TypeSyntax;
 
             var defineFunction = MethodDeclaration(returnType, node.ID.Text)
@@ -303,7 +320,7 @@ namespace MyCompiler.Visitors
 
             node.Arguments.ForEach(arg => defineFunction = defineFunction.AddParameterListParameters(
                 Parameter(GetNodeWithAnnotation(Identifier(arg.Name.Text), arg.Name.Location))
-                .WithType(GetNodeWithAnnotation(ParseTypeName(arg.Type.Name), arg.Type.Location) as TypeSyntax)
+                .WithType(GetNodeWithAnnotation(ParseTypeName(arg.Type.ID.Text), arg.Type.Location) as TypeSyntax)
             ));
 
             if (node.Body.Statements.Count == 0) //if empty function
@@ -323,8 +340,8 @@ namespace MyCompiler.Visitors
 
         public override void VisitCallProcedureNode(CallProcedureNode node)
         {
-            var procedureName = IdentifierName(node.Name.Text);
-            procedureName = GetNodeWithAnnotation(procedureName, node.Name.Location) as IdentifierNameSyntax;
+            node.Name.Visit(this);
+            var procedureName = expressions.Pop();
 
             var callProcedure = InvocationExpression(procedureName);
 
@@ -341,8 +358,8 @@ namespace MyCompiler.Visitors
 
         public override void VisitCallFunctionNode(CallFunctionNode node)
         {
-            var functionName = IdentifierName(node.Name.Text);
-            functionName = GetNodeWithAnnotation(functionName, node.Name.Location) as IdentifierNameSyntax;
+            node.Name.Visit(this);
+            var functionName = expressions.Pop();
 
             var callFunction = InvocationExpression(functionName);
 

@@ -17,6 +17,7 @@
     public DefineVarNode defineVarValue;
     public AssignVarNode assignVarValue;
     public IDNode idValue;
+    public ComplexIDNode complexIdValue;
     public TypeNode typeValue;
     public DefineFunctionNode defineFuncValue;
     public CallProcedureNode callProcValue;
@@ -34,7 +35,7 @@
 
 %namespace MyCompiler
 
-%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN LOOP
+%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN LOOP DOT
 %token ASSIGNEQ
 %token PLUS MINUS MUL DIV MOD
 
@@ -52,6 +53,7 @@
 
 %type <typeValue> type
 %type <idValue> ident
+%type <complexIdValue> complexIdent complexIdent2
 
 %type <defineVarsListValue> defineVarList
 %type <defineFuncArgumentsValue> defFuncArgList
@@ -67,7 +69,13 @@
 
 program         : statementsList { Root = $1; Root.Location = @$; (Root as BlockNode).IsMainBlock = true; } ;
 
-type            : ID { $$ = new TypeNode($1, @$); } ;
+complexIdent    : complexIdent DOT complexIdent2 { $$ = new ComplexIDNode($1, $3, @$); }
+                | complexIdent2 { $$ = $1; }
+                ;
+
+complexIdent2   : ident { $$ = new ComplexIDNode($1, null, @$); } ;
+
+type            : complexIdent { $$ = new TypeNode($1, @$); } ;
 
 ident           : ID { $$ = new IDNode($1, @$); } ;
 
@@ -102,9 +110,9 @@ defineFuncStmt  : type ident LRBRACKET defFuncArgList RRBRACKET block
                   }
                 ;
 
-callFuncStmt    : ident LRBRACKET callFuncArgList RRBRACKET { $$ = new CallProcedureNode($1, $3, @$); } ;
+callFuncStmt    : complexIdent LRBRACKET callFuncArgList RRBRACKET { $$ = new CallProcedureNode($1, $3, @$); } ;
 
-callFuncExpr    : ident LRBRACKET callFuncArgList RRBRACKET { $$ = new CallFunctionNode($1, $3, @$); } ;
+callFuncExpr    : complexIdent LRBRACKET callFuncArgList RRBRACKET { $$ = new CallFunctionNode($1, $3, @$); } ;
 
 return          : RETURN expression { $$ = new ReturnNode($2, @$); } ;
 
@@ -141,7 +149,7 @@ expr2           : expr2 MUL expr3 { $$ = new BinaryExpressionNode($1, $3, "*", @
 
 expr3           : INTNUM { $$ = new IntNumNode($1, @$); }
                 | REALNUM { $$ = new RealNumNode($1, @$); }
-                | ident { $$ = $1; }
+                | complexIdent { $$ = $1; }
                 | callFuncExpr { $$ = $1; }
                 | LRBRACKET expression RRBRACKET { $2.IsInParens = true; $$ = $2; }
                 ;
