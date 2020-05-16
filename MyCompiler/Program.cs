@@ -95,7 +95,7 @@ namespace MyCompiler
                 new[] {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                     MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
-                    MetadataReference.CreateFromFile(typeof(Console).Assembly.Location)
+                    MetadataReference.CreateFromFile(Assembly.Load("System.Console").Location),
                 },
                 new CSharpCompilationOptions(
                     OutputKind.ConsoleApplication, //set application type as console app

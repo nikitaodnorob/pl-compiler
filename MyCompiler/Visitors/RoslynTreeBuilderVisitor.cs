@@ -154,14 +154,11 @@ namespace MyCompiler.Visitors
         /// </summary>
         public RoslynTreeBuilderVisitor()
         {
-            //Create unit and add using "System"
-            unitNode = CompilationUnit().AddUsings(
-                CreateUsingDirective("System")
-            );
+            //Create unit
+            unitNode = CompilationUnit();
 
             //Create public class "Program"
-            programClassNode = ClassDeclaration("Program")
-                .AddModifiers(Token(SyntaxKind.PublicKeyword));
+            programClassNode = ClassDeclaration("Program").AddModifiers(Token(SyntaxKind.PublicKeyword));
 
             //Create method void Main() 
             mainMethodNode = MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)), "Main");
@@ -248,13 +245,16 @@ namespace MyCompiler.Visitors
         {
             node.Expression.Visit(this);
 
-            //"print" operation in my language is Console.WriteLine method call
-            var printClassName = IdentifierName("Console");
-            var printMethodName = IdentifierName("WriteLine");
+            //"print" operation in my language is System.Console.WriteLine method call
+            var systemName = IdentifierName("System");
+            var consoleName = IdentifierName("Console");
+            var writeLineName = IdentifierName("WriteLine");
             var printStatement = ExpressionStatement(
-                InvocationExpression(
-                    MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, printClassName, printMethodName)
-                ).AddArgumentListArguments(Argument(expressions.Pop()))
+                InvocationExpression(MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, systemName, consoleName),
+                    writeLineName
+                )).AddArgumentListArguments(Argument(expressions.Pop()))
             );
             AddStatementToCurrentBlock(printStatement);
         }

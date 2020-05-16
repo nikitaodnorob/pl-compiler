@@ -1,4 +1,4 @@
 ﻿int a = 1;
 print a.ToString();
 
-Console.WriteLine(2);
+System.Console.WriteLine(2);
