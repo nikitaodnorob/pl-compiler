@@ -1,9 +1,9 @@
-﻿loop 5 {
+﻿loop (5) {
 	print 1;
 }
 
 void print222() {
-	loop 3 print 2;
+	loop (3) print 2;
 }
 
 print222();

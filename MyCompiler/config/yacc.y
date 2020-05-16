@@ -25,10 +25,12 @@
     public ReturnNode returnValue;
     public LoopNode loopValue;
     public NetUsingNode netUsingValue;
+    public ArrayNode arrayValue;
 
     public List<AssignVarNode> defineVarsListValue;
     public List<DefineFunctionArgumentNode> defineFuncArgumentsValue;
     public List<CallFunctionArgumentNode> callFuncArgumentsValue;
+    public List<ArrayElement> arrayElementsValue;
 }
 
 %using System.IO;
@@ -36,7 +38,8 @@
 
 %namespace MyCompiler
 
-%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN LOOP DOT NETUSING
+%token COMMA SEMICOLON PRINT RETURN LOOP DOT NETUSING 
+%token LRBRACKET RRBRACKET LFBRACKET RFBRACKET LSBRACKET RSBRACKET
 %token ASSIGNEQ
 %token PLUS MINUS MUL DIV MOD
 
@@ -52,13 +55,14 @@
 %type <defineVarValue> defineVarsStmt
 %type <assignVarValue> assignVarStmt defineVarsItem
 
-%type <typeValue> type
+%type <typeValue> type simpleType
 %type <idValue> ident
 %type <complexIdValue> complexIdent complexIdent2
 
 %type <defineVarsListValue> defineVarList
 %type <defineFuncArgumentsValue> defFuncArgList
 %type <callFuncArgumentsValue> callFuncArgList
+%type <arrayElementsValue> arrayElemsList
 
 %type <defineFuncValue> defineFuncStmt
 %type <callProcValue> callFuncStmt
@@ -66,6 +70,7 @@
 %type <returnValue> return
 %type <loopValue> loop
 %type <netUsingValue> netUsing
+%type <arrayValue> array
 
 %%
 
@@ -77,12 +82,15 @@ complexIdent    : complexIdent DOT complexIdent2 { $$ = new ComplexIDNode($1, $3
 
 complexIdent2   : ident { $$ = new ComplexIDNode($1, null, @$); } ;
 
-type            : complexIdent { $$ = new TypeNode($1, @$); } ;
+type            : complexIdent { $$ = new TypeNode($1, @$); }
+                | complexIdent LSBRACKET RSBRACKET { $$ = new TypeNode($1, @$); $$.SetArrayType(); } 
+                ;
+
+simpleType      : complexIdent { $$ = new TypeNode($1, @$); } ; /* only type, without [] */
 
 ident           : ID { $$ = new IDNode($1, @$); } ;
 
-printStmt       : PRINT expression { $$ = new PrintNode($2, @$); }
-                ;
+printStmt       : PRINT expression { $$ = new PrintNode($2, @$); } ;
 
 defineVarsStmt  : type defineVarList { $$ = new DefineVarNode($1, $2, @$); } ;
 
@@ -118,9 +126,16 @@ callFuncExpr    : complexIdent LRBRACKET callFuncArgList RRBRACKET { $$ = new Ca
 
 return          : RETURN expression { $$ = new ReturnNode($2, @$); } ;
 
-loop            : LOOP expression statement { $$ = new LoopNode($2, $3, @$); } ;
+loop            : LOOP LRBRACKET expression RRBRACKET statement { $$ = new LoopNode($3, $5, @$); } ;
 
 netUsing        : NETUSING complexIdent { $$ = new NetUsingNode($2, @$); } ;
+
+arrayElemsList  : expression { $$ = new List<ArrayElement> { new ArrayElement($1, @$) }; }
+                | arrayElemsList COMMA expression { $1.Add(new ArrayElement($3, @$)); $$ = $1; }
+                | { $$ = new List<ArrayElement>{ }; }
+                ;
+
+array           : simpleType LFBRACKET arrayElemsList RFBRACKET { $$ = new ArrayNode($1, $3, @$); } ;
 
 statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineVarsStmt SEMICOLON { $$ = $1; }
@@ -156,6 +171,7 @@ expr3           : INTNUM { $$ = new IntNumNode($1, @$); }
                 | REALNUM { $$ = new RealNumNode($1, @$); }
                 | complexIdent { $$ = $1; }
                 | callFuncExpr { $$ = $1; }
+                | array { $$ = $1; }
                 | LRBRACKET expression RRBRACKET { $2.IsInParens = true; $$ = $2; }
                 ;
 

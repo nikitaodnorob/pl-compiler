@@ -52,5 +52,7 @@ namespace MyCompiler.Visitors
         public virtual void VisitLoopNode(LoopNode node) { }
 
         public virtual void VisitNetUsingNode(NetUsingNode node) { }
+
+        public virtual void VisitArrayNode(ArrayNode node) { }
     }
 }

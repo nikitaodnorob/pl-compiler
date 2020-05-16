@@ -41,6 +41,8 @@ ID			{Alpha}{AlphaDigit}*
 "/" { return (int)Tokens.DIV; }
 "%" { return (int)Tokens.MOD; }
 "." { return (int)Tokens.DOT; }
+"[" { return (int)Tokens.LSBRACKET; }
+"]" { return (int)Tokens.RSBRACKET; }
 
 [^ \r\n\t] {
 	LexError();

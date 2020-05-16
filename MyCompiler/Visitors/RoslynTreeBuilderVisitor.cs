@@ -244,7 +244,7 @@ namespace MyCompiler.Visitors
 
         public override void VisitTypeNode(TypeNode node)
         {
-            var type = ParseTypeName(node.ID.Text);
+            var type = ParseTypeName(node.IsArray ? node.ID.Text + "[]" : node.ID.Text);
             type = GetNodeWithAnnotation(type, node.Location) as TypeSyntax;
             expressions.Push(type);
         }
@@ -452,5 +452,26 @@ namespace MyCompiler.Visitors
         }
 
         public override void VisitNetUsingNode(NetUsingNode node) => Usings.Add(node.ID.Text);
+
+        public override void VisitArrayNode(ArrayNode node)
+        {
+            node.Type.Visit(this);
+
+            var initializer = InitializerExpression(SyntaxKind.ArrayInitializerExpression);
+            foreach (var element in node.Elements)
+            {
+                element.Expression.Visit(this);
+                initializer = initializer.AddExpressions(expressions.Pop());
+            }
+
+            var arrayType = ArrayType(expressions.Pop() as TypeSyntax);
+            var rankSpecifier = ArrayRankSpecifier().AddSizes(OmittedArraySizeExpression());
+            var array = ArrayCreationExpression(arrayType)
+                .AddTypeRankSpecifiers(rankSpecifier)
+                .WithInitializer(initializer);
+            
+            array = GetNodeWithAnnotation(array, node.Location) as ArrayCreationExpressionSyntax;
+            expressions.Push(array);
+        }
     }
 }

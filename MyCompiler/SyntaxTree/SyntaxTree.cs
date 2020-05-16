@@ -52,8 +52,11 @@ namespace MyCompiler.SyntaxTree
     public class TypeNode : Node
     {
         public IDNode ID { get; private set; }
+        public bool IsArray { get; private set; }
 
         public TypeNode(IDNode id, LexLocation location) { ID = id; Location = location; }
+
+        public void SetArrayType() { IsArray = true; }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitTypeNode(this);
     }
@@ -223,5 +226,30 @@ namespace MyCompiler.SyntaxTree
         }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitNetUsingNode(this);
+    }
+
+    public class ArrayElement : ExprNode
+    {
+        public ExprNode Expression { get; private set; }
+
+        public ArrayElement(ExprNode expr, LexLocation location)
+        {
+            Expression = expr; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) { }
+    }
+
+    public class ArrayNode : ExprNode
+    {
+        public TypeNode Type { get; private set; }
+        public List<ArrayElement> Elements { get; private set; }
+
+        public ArrayNode(TypeNode type, List<ArrayElement> elements, LexLocation location)
+        {
+            Type = type; Elements = elements; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitArrayNode(this);
     }
 }
