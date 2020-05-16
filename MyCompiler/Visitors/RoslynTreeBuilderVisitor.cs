@@ -28,6 +28,11 @@ namespace MyCompiler.Visitors
         public List<SyntaxAnnotation> LocationAnnotations { get; private set; }
 
         /// <summary>
+        /// List of .NET usings
+        /// </summary>
+        public List<string> Usings { get; private set; } = new List<string>();
+
+        /// <summary>
         /// Auxiliary function for generating tree node of Using syntax
         /// </summary>
         /// <param name="usingName">Name of using</param>
@@ -143,6 +148,9 @@ namespace MyCompiler.Visitors
 
                 //add namespace into unit 
                 unitNode = unitNode.AddMembers(namespaceNode);
+
+                //add usings
+                Usings.ForEach(@using => unitNode = unitNode.AddUsings(CreateUsingDirective(@using)));
 
                 return unitNode;
             }
@@ -442,5 +450,7 @@ namespace MyCompiler.Visitors
             );
             AddStatementToCurrentBlock(whileNode);
         }
+
+        public override void VisitNetUsingNode(NetUsingNode node) => Usings.Add(node.ID.Text);
     }
 }

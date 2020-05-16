@@ -1,4 +1,9 @@
-﻿int a = 1;
+﻿netusing System;
+netusing System.Threading;
+
+int a = 1;
 print a.ToString();
 
-System.Console.WriteLine(2);
+Thread.Sleep(1000);
+
+print Math.Sin(30 * Math.PI / 180);

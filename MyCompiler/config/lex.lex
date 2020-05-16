@@ -72,6 +72,7 @@ static class LexerHelper
         keywords.Add("print", (int)Tokens.PRINT);
         keywords.Add("return", (int)Tokens.RETURN);
         keywords.Add("loop", (int)Tokens.LOOP);
+        keywords.Add("netusing", (int)Tokens.NETUSING);
     }
 
     public static int GetIDToken(string s) => keywords.ContainsKey(s) ? keywords[s] : (int)Tokens.ID;

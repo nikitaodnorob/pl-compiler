@@ -21,6 +21,8 @@ namespace MyCompiler.Visitors
 
         public virtual void VisitIDNode(IDNode node) { }
 
+        public virtual void VisitComplexIDNode(ComplexIDNode node) { }
+
         public virtual void VisitTypeNode(TypeNode node) { }
 
         public virtual void VisitBlockNode(BlockNode node) 
@@ -49,6 +51,6 @@ namespace MyCompiler.Visitors
 
         public virtual void VisitLoopNode(LoopNode node) { }
 
-        public virtual void VisitComplexIDNode(ComplexIDNode node) { }
+        public virtual void VisitNetUsingNode(NetUsingNode node) { }
     }
 }

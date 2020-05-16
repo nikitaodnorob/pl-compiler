@@ -212,4 +212,16 @@ namespace MyCompiler.SyntaxTree
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitLoopNode(this);
     }
+
+    public class NetUsingNode : StatNode
+    {
+        public IDNode ID { get; private set; }
+
+        public NetUsingNode(IDNode id, LexLocation location)
+        {
+            ID = id; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitNetUsingNode(this);
+    }
 }

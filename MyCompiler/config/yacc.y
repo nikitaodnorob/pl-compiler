@@ -24,6 +24,7 @@
     public CallFunctionNode callFuncValue;
     public ReturnNode returnValue;
     public LoopNode loopValue;
+    public NetUsingNode netUsingValue;
 
     public List<AssignVarNode> defineVarsListValue;
     public List<DefineFunctionArgumentNode> defineFuncArgumentsValue;
@@ -35,7 +36,7 @@
 
 %namespace MyCompiler
 
-%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN LOOP DOT
+%token LRBRACKET RRBRACKET COMMA SEMICOLON PRINT LFBRACKET RFBRACKET RETURN LOOP DOT NETUSING
 %token ASSIGNEQ
 %token PLUS MINUS MUL DIV MOD
 
@@ -64,6 +65,7 @@
 %type <callFuncValue> callFuncExpr
 %type <returnValue> return
 %type <loopValue> loop
+%type <netUsingValue> netUsing
 
 %%
 
@@ -118,6 +120,8 @@ return          : RETURN expression { $$ = new ReturnNode($2, @$); } ;
 
 loop            : LOOP expression statement { $$ = new LoopNode($2, $3, @$); } ;
 
+netUsing        : NETUSING complexIdent { $$ = new NetUsingNode($2, @$); } ;
+
 statement       : printStmt SEMICOLON { $$ = $1; }
                 | defineVarsStmt SEMICOLON { $$ = $1; }
                 | assignVarStmt SEMICOLON { $$ = $1; }
@@ -126,6 +130,7 @@ statement       : printStmt SEMICOLON { $$ = $1; }
                 | callFuncStmt SEMICOLON { $$ = $1; }
                 | return SEMICOLON { $$ = $1; }
                 | loop { $$ = $1; }
+                | netUsing SEMICOLON { $$ = $1; }
                 ;
 
 block           : LFBRACKET RFBRACKET { $$ = new BlockNode(@$); }
