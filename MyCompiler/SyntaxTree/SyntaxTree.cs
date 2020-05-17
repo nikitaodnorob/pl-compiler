@@ -108,12 +108,15 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) => visitor.VisitAssignVarNode(this);
     }
 
-    public class DefineFunctionArgumentNode : Node
+    /// <summary>
+    /// List with elements "type ID", e.g. "type1 ID1, type2 ID2, ..."
+    /// </summary>
+    public class TypeIDListElementNode : Node
     {
         public TypeNode Type { get; private set; }
         public IDNode Name { get; private set; }
 
-        public DefineFunctionArgumentNode(TypeNode type, IDNode name, LexLocation location) 
+        public TypeIDListElementNode(TypeNode type, IDNode name, LexLocation location) 
         { 
             Type = type; Name = name; Location = location;
         }
@@ -121,11 +124,14 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) { }
     }
 
-    public class CallFunctionArgumentNode : Node
+    /// <summary>
+    /// List with expressions elements, e.g. "expr1, expr2, ..."
+    /// </summary>
+    public class ExprListElementNode : Node
     {
         public ExprNode Expression { get; private set; }
 
-        public CallFunctionArgumentNode(ExprNode expression, LexLocation location)
+        public ExprListElementNode(ExprNode expression, LexLocation location)
         {
             Expression = expression; Location = location;
         }
@@ -137,13 +143,13 @@ namespace MyCompiler.SyntaxTree
     {
         public IDNode ID { get; private set; }
         public TypeNode ReturnType { get; private set; }
-        public List<DefineFunctionArgumentNode> Arguments { get; private set; }
+        public List<TypeIDListElementNode> Arguments { get; private set; }
         public BlockNode Body { get; private set; }
 
         public DefineFunctionNode(
             TypeNode returnType,
             IDNode id,
-            List<DefineFunctionArgumentNode> arguments,
+            List<TypeIDListElementNode> arguments,
             BlockNode body,
             LexLocation location
         )
@@ -157,9 +163,9 @@ namespace MyCompiler.SyntaxTree
     public class CallProcedureNode : StatNode
     {
         public IDNode Name { get; private set; }
-        public List<CallFunctionArgumentNode> Arguments { get; private set; }
+        public List<ExprListElementNode> Arguments { get; private set; }
 
-        public CallProcedureNode(IDNode name, List<CallFunctionArgumentNode> arguments, LexLocation location)
+        public CallProcedureNode(IDNode name, List<ExprListElementNode> arguments, LexLocation location)
         {
             Name = name; Arguments = arguments; Location = location;
         }
@@ -170,9 +176,9 @@ namespace MyCompiler.SyntaxTree
     public class CallFunctionNode : ExprNode
     {
         public IDNode Name { get; private set; }
-        public List<CallFunctionArgumentNode> Arguments { get; private set; }
+        public List<ExprListElementNode> Arguments { get; private set; }
 
-        public CallFunctionNode(IDNode name, List<CallFunctionArgumentNode> arguments, LexLocation location)
+        public CallFunctionNode(IDNode name, List<ExprListElementNode> arguments, LexLocation location)
         {
             Name = name; Arguments = arguments; Location = location;
         }

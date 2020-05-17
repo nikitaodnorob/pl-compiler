@@ -28,8 +28,8 @@
     public ArrayNode arrayValue;
 
     public List<AssignVarNode> defineVarsListValue;
-    public List<DefineFunctionArgumentNode> defineFuncArgumentsValue;
-    public List<CallFunctionArgumentNode> callFuncArgumentsValue;
+    public List<TypeIDListElementNode> typeIdListElementsValue;
+    public List<ExprListElementNode> exprListElementValue;
     public List<ArrayElement> arrayElementsValue;
 }
 
@@ -60,8 +60,8 @@
 %type <complexIdValue> complexIdent complexIdent2
 
 %type <defineVarsListValue> defineVarList
-%type <defineFuncArgumentsValue> defFuncArgList
-%type <callFuncArgumentsValue> callFuncArgList
+%type <typeIdListElementsValue> defFuncArgList
+%type <exprListElementValue> callFuncArgList
 %type <arrayElementsValue> arrayElemsList
 
 %type <defineFuncValue> defineFuncStmt
@@ -104,14 +104,14 @@ defineVarList   : defineVarsItem { $$ = new List<AssignVarNode> { $1 }; }
 
 assignVarStmt   : ident ASSIGNEQ expression { $$ = new AssignVarNode($1, $3, @$); } ;
 
-defFuncArgList  : type ident { $$ = new List<DefineFunctionArgumentNode> { new DefineFunctionArgumentNode($1, $2, @$) }; }
-                | defFuncArgList COMMA type ident { $1.Add(new DefineFunctionArgumentNode($3, $4, @$)); $$ = $1; }
-                | { $$ = new List<DefineFunctionArgumentNode> { }; }
+defFuncArgList  : type ident { $$ = new List<TypeIDListElementNode> { new TypeIDListElementNode($1, $2, @$) }; }
+                | defFuncArgList COMMA type ident { $1.Add(new TypeIDListElementNode($3, $4, @$)); $$ = $1; }
+                | { $$ = new List<TypeIDListElementNode> { }; }
                 ;
 
-callFuncArgList : expression { $$ = new List<CallFunctionArgumentNode> { new CallFunctionArgumentNode($1, @$) }; }
-                | callFuncArgList COMMA expression { $1.Add(new CallFunctionArgumentNode($3, @$)); $$ = $1; }
-                | { $$ = new List<CallFunctionArgumentNode> { }; }
+callFuncArgList : expression { $$ = new List<ExprListElementNode> { new ExprListElementNode($1, @$) }; }
+                | callFuncArgList COMMA expression { $1.Add(new ExprListElementNode($3, @$)); $$ = $1; }
+                | { $$ = new List<ExprListElementNode> { }; }
                 ;
 
 defineFuncStmt  : type ident LRBRACKET defFuncArgList RRBRACKET block
