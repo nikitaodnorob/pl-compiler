@@ -244,7 +244,12 @@ namespace MyCompiler.Visitors
 
         public override void VisitTypeNode(TypeNode node)
         {
-            var type = ParseTypeName(node.IsArray ? node.ID.Text + "[]" : node.ID.Text);
+            var type = ParseTypeName(node.ID.Text);
+            if (node.IsArray) 
+                type = QualifiedName(
+                    IdentifierName("MyCompilerLibrary"), 
+                    GenericName("Array").AddTypeArgumentListArguments(type)
+                );
             type = GetNodeWithAnnotation(type, node.Location) as TypeSyntax;
             expressions.Push(type);
         }
@@ -469,9 +474,15 @@ namespace MyCompiler.Visitors
             var array = ArrayCreationExpression(arrayType)
                 .AddTypeRankSpecifiers(rankSpecifier)
                 .WithInitializer(initializer);
-            
-            array = GetNodeWithAnnotation(array, node.Location) as ArrayCreationExpressionSyntax;
-            expressions.Push(array);
+
+            var libraryArray = ObjectCreationExpression(QualifiedName(
+                    IdentifierName("MyCompilerLibrary"),
+                    GenericName("Array").AddTypeArgumentListArguments(arrayType)
+                )).AddArgumentListArguments(Argument(array));
+
+
+            libraryArray = GetNodeWithAnnotation(libraryArray, node.Location) as ObjectCreationExpressionSyntax;
+            expressions.Push(libraryArray);
         }
     }
 }

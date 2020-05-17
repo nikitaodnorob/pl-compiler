@@ -89,13 +89,17 @@ namespace MyCompiler
             var locationAnnotations = visitor.LocationAnnotations;
             var locationMap = GetLocationMap(programUnit, locationAnnotations);
 
+            //get syntax trees of standard library
+            var arraySyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText("../../../MyCompilerLibrary/Array.cs"));
+
             CSharpCompilation compilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { programUnit.SyntaxTree },
+                new[] { programUnit.SyntaxTree, arraySyntaxTree },
                 new[] {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                     MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
                     MetadataReference.CreateFromFile(Assembly.Load("System.Console").Location),
+                    MetadataReference.CreateFromFile(Assembly.Load("System.Linq").Location),
                 },
                 new CSharpCompilationOptions(
                     OutputKind.ConsoleApplication, //set application type as console app
