@@ -164,6 +164,7 @@ expression      : expression PLUS expr2 { $$ = new BinaryExpressionNode($1, $3, 
 expr2           : expr2 MUL expr3 { $$ = new BinaryExpressionNode($1, $3, "*", @$); }
                 | expr2 DIV expr3 { $$ = new BinaryExpressionNode($1, $3, "/", @$); }
                 | expr2 MOD expr3 { $$ = new BinaryExpressionNode($1, $3, "%", @$); }
+                | expr2 LSBRACKET expr3 RSBRACKET { $$ = new IndexAccessExpressionNode($1, $3, @$); }
                 | expr3 { $$ = $1; }
                 ;
 

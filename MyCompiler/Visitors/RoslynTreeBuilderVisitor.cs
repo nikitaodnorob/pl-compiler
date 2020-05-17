@@ -425,6 +425,17 @@ namespace MyCompiler.Visitors
             }
         }
 
+        public override void VisitIndexAccessExpressionNode(IndexAccessExpressionNode node)
+        {
+            node.Index.Visit(this);
+            node.Expression.Visit(this);
+
+            var expression = ElementAccessExpression(expressions.Pop())
+                .AddArgumentListArguments(Argument(expressions.Pop()));
+            expression = GetNodeWithAnnotation(expression, node.Location) as ElementAccessExpressionSyntax;
+            expressions.Push(expression);
+        }
+
         public override void VisitLoopNode(LoopNode node)
         {
             node.Count.Visit(this);
