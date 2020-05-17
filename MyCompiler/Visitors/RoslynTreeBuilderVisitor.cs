@@ -473,5 +473,60 @@ namespace MyCompiler.Visitors
             array = GetNodeWithAnnotation(array, node.Location) as ArrayCreationExpressionSyntax;
             expressions.Push(array);
         }
+
+        public override void VisitTupleNode(TupleNode node)
+        {
+            var tuple = TupleExpression();
+            foreach (var expr in node.Expressions)
+            {
+                expr.Visit(this);
+                tuple = tuple.AddArguments(Argument(expressions.Pop()));
+            }
+            tuple = GetNodeWithAnnotation(tuple, node.Location) as TupleExpressionSyntax;
+            expressions.Push(tuple);
+        }
+
+        public override void VisitDefineTupleNode(DefineTupleNode node)
+        {
+            node.TupleValue.Visit(this);
+
+            var tuple = TupleExpression();
+            foreach (var item in node.Variables)
+            {
+                item.Type.Visit(this);
+
+                var variableDesignation = SingleVariableDesignation(Identifier(item.Name.Text));
+                variableDesignation = GetNodeWithAnnotation(variableDesignation, item.Name.Location) 
+                    as SingleVariableDesignationSyntax;
+                tuple = tuple.AddArguments(Argument(DeclarationExpression(
+                    expressions.Pop() as TypeSyntax,
+                    variableDesignation
+                )));
+            }
+
+            var kindAssigment = SyntaxKind.SimpleAssignmentExpression;
+            var assignTuple = AssignmentExpression(kindAssigment, tuple, expressions.Pop());
+            assignTuple = GetNodeWithAnnotation(assignTuple, node.Location) as AssignmentExpressionSyntax;
+
+            AddStatementToCurrentBlock(ExpressionStatement(assignTuple));
+        }
+
+        public override void VisitAssignTupleNode(AssignTupleNode node)
+        {
+            node.Value.Visit(this);
+
+            var tuple = TupleExpression();
+            foreach (var id in node.Tuple.Variables)
+            {
+                id.Visit(this);
+                tuple = tuple.AddArguments(Argument(expressions.Pop()));
+            }
+
+            var kindAssigment = SyntaxKind.SimpleAssignmentExpression;
+            var assignTuple = AssignmentExpression(kindAssigment, tuple, expressions.Pop());
+            assignTuple = GetNodeWithAnnotation(assignTuple, node.Location) as AssignmentExpressionSyntax;
+
+            AddStatementToCurrentBlock(ExpressionStatement(assignTuple));
+        }
     }
 }

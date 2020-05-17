@@ -26,11 +26,17 @@
     public LoopNode loopValue;
     public NetUsingNode netUsingValue;
     public ArrayNode arrayValue;
+    public TupleNode tupleValue;
+    public DefineTupleNode defineTupleValue;
+    public TupleVarNode tupleVarValue;
+    public AssignTupleNode assignTupleValue;
 
     public List<AssignVarNode> defineVarsListValue;
     public List<TypeIDListElementNode> typeIdListElementsValue;
     public List<ExprListElementNode> exprListElementValue;
     public List<ArrayElement> arrayElementsValue;
+    public List<ExprNode> exprsListValue;
+    public List<IDNode> idsListValue;
 }
 
 %using System.IO;
@@ -68,9 +74,20 @@
 %type <callProcValue> callFuncStmt
 %type <callFuncValue> callFuncExpr
 %type <returnValue> return
+
 %type <loopValue> loop
+
 %type <netUsingValue> netUsing
+
 %type <arrayValue> array
+
+%type <exprsListValue> tupleExprList
+%type <tupleValue> tupleExpr
+%type <defineTupleValue> defineTuple
+%type <tupleVarValue> tupleVar
+%type <typeIdListElementsValue> defTupleVarsList
+%type <idsListValue> tupleVarList
+%type <assignTupleValue> assignTuple
 
 %%
 
@@ -137,6 +154,29 @@ arrayElemsList  : expression { $$ = new List<ArrayElement> { new ArrayElement($1
 
 array           : simpleType LFBRACKET arrayElemsList RFBRACKET { $$ = new ArrayNode($1, $3, @$); } ;
 
+defTupleVarsList : type ident COMMA type ident
+                    {
+                        $$ = new List<TypeIDListElementNode> { new TypeIDListElementNode($1, $2), new TypeIDListElementNode($4, $5) };
+                    }
+                 | defTupleVarsList COMMA type ident { $1.Add(new TypeIDListElementNode($3, $4)); $$ = $1; }
+                 ;
+
+tupleExprList   : expression COMMA expression { $$ = new List<ExprNode> { $1, $3 }; }
+                | tupleExprList COMMA expression { $1.Add($3); $$ = $1; }
+                ;
+
+tupleExpr       : LRBRACKET tupleExprList RRBRACKET { $$ = new TupleNode($2, @$); } ;
+
+tupleVarList    : ident COMMA ident { $$ = new List<IDNode> { $1, $3 }; }
+                | tupleVarList COMMA ident { $1.Add($3); $$ = $1; }
+                ;
+
+tupleVar        : LRBRACKET tupleVarList RRBRACKET { $$ = new TupleVarNode($2, @$); } ;
+
+defineTuple     : LRBRACKET defTupleVarsList RRBRACKET ASSIGNEQ tupleExpr { $$ = new DefineTupleNode($2, $5, @$); } ;
+
+assignTuple     : tupleVar ASSIGNEQ tupleExpr { $$ = new AssignTupleNode($1, $3, @$); } ;
+
 stmt            : block { $$ = $1; }
                 | defineFuncStmt { $$ = $1; }
                 | loop { $$ = $1; }
@@ -148,6 +188,8 @@ stmtSemicolon   : printStmt { $$ = $1; }
                 | callFuncStmt { $$ = $1; }
                 | return { $$ = $1; }
                 | netUsing { $$ = $1; }
+                | defineTuple { $$ = $1; }
+                | assignTuple { $$ = $1; }
                 ;
 
 statement       : stmt { $$ = $1; }

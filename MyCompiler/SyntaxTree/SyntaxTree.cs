@@ -116,7 +116,7 @@ namespace MyCompiler.SyntaxTree
         public TypeNode Type { get; private set; }
         public IDNode Name { get; private set; }
 
-        public TypeIDListElementNode(TypeNode type, IDNode name, LexLocation location) 
+        public TypeIDListElementNode(TypeNode type, IDNode name, LexLocation location = null) 
         { 
             Type = type; Name = name; Location = location;
         }
@@ -257,5 +257,55 @@ namespace MyCompiler.SyntaxTree
         }
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitArrayNode(this);
+    }
+
+    public class TupleNode : ExprNode
+    {
+        public List<ExprNode> Expressions { get; private set; }
+
+        public TupleNode(List<ExprNode> exprs, LexLocation location)
+        {
+            Expressions = exprs; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitTupleNode(this);
+    }
+
+    public class DefineTupleNode : StatNode
+    {
+        public List<TypeIDListElementNode> Variables { get; private set; }
+        public TupleNode TupleValue { get; private set; }
+
+        public DefineTupleNode(List<TypeIDListElementNode> vars, TupleNode value, LexLocation location)
+        {
+            Variables = vars; TupleValue = value; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitDefineTupleNode(this);
+    }
+
+    public class TupleVarNode : StatNode
+    {
+        public List<IDNode> Variables { get; private set; }
+
+        public TupleVarNode(List<IDNode> vars, LexLocation location)
+        {
+            Variables = vars; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitTupleVarNode(this);
+    }
+
+    public class AssignTupleNode : StatNode
+    {
+        public TupleVarNode Tuple { get; private set; }
+        public TupleNode Value { get; private set; }
+
+        public AssignTupleNode(TupleVarNode tuple, TupleNode value, LexLocation location)
+        {
+            Tuple = tuple; Value = value; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitAssignTupleNode(this);
     }
 }

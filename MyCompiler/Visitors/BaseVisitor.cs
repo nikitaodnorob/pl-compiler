@@ -54,5 +54,13 @@ namespace MyCompiler.Visitors
         public virtual void VisitNetUsingNode(NetUsingNode node) { }
 
         public virtual void VisitArrayNode(ArrayNode node) { }
+
+        public virtual void VisitTupleNode(TupleNode node) { }
+
+        public virtual void VisitDefineTupleNode(DefineTupleNode node) { }
+
+        public virtual void VisitTupleVarNode(TupleVarNode node) { }
+
+        public virtual void VisitAssignTupleNode(AssignTupleNode node) { }
     }
 }
