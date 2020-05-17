@@ -48,7 +48,7 @@
 %token <sValue> ID
 
 %type <exprValue> expression expr2 expr3
-%type <statValue> statement
+%type <statValue> statement stmt stmtSemicolon
 
 %type <blockValue> statementsList block
 %type <printValue> printStmt
@@ -137,15 +137,21 @@ arrayElemsList  : expression { $$ = new List<ArrayElement> { new ArrayElement($1
 
 array           : simpleType LFBRACKET arrayElemsList RFBRACKET { $$ = new ArrayNode($1, $3, @$); } ;
 
-statement       : printStmt SEMICOLON { $$ = $1; }
-                | defineVarsStmt SEMICOLON { $$ = $1; }
-                | assignVarStmt SEMICOLON { $$ = $1; }
-                | block { $$ = $1; }
+stmt            : block { $$ = $1; }
                 | defineFuncStmt { $$ = $1; }
-                | callFuncStmt SEMICOLON { $$ = $1; }
-                | return SEMICOLON { $$ = $1; }
                 | loop { $$ = $1; }
-                | netUsing SEMICOLON { $$ = $1; }
+                ;
+
+stmtSemicolon   : printStmt { $$ = $1; }
+                | defineVarsStmt { $$ = $1; }
+                | assignVarStmt { $$ = $1; }
+                | callFuncStmt { $$ = $1; }
+                | return { $$ = $1; }
+                | netUsing { $$ = $1; }
+                ;
+
+statement       : stmt { $$ = $1; }
+                | stmtSemicolon SEMICOLON { $$ = $1; }
                 ;
 
 block           : LFBRACKET RFBRACKET { $$ = new BlockNode(@$); }
