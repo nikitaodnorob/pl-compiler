@@ -209,6 +209,19 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) => visitor.VisitBinaryExpressionNode(this);
     }
 
+    public class IndexAccessExpressionNode : ExprNode
+    {
+        public ExprNode Expression { get; private set; }
+        public ExprNode Index { get; private set; }
+
+        public IndexAccessExpressionNode(ExprNode expr, ExprNode index, LexLocation location)
+        {
+            Expression = expr; Index = index; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitIndexAccessExpressionNode(this);
+    }
+
     public class LoopNode : StatNode
     {
         public ExprNode Count { get; private set; }

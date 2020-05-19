@@ -244,7 +244,12 @@ namespace MyCompiler.Visitors
 
         public override void VisitTypeNode(TypeNode node)
         {
-            var type = ParseTypeName(node.IsArray ? node.ID.Text + "[]" : node.ID.Text);
+            var type = ParseTypeName(node.ID.Text);
+            if (node.IsArray) 
+                type = QualifiedName(
+                    IdentifierName("MyCompilerLibrary"), 
+                    GenericName("Array").AddTypeArgumentListArguments(type)
+                );
             type = GetNodeWithAnnotation(type, node.Location) as TypeSyntax;
             expressions.Push(type);
         }
@@ -420,6 +425,17 @@ namespace MyCompiler.Visitors
             }
         }
 
+        public override void VisitIndexAccessExpressionNode(IndexAccessExpressionNode node)
+        {
+            node.Index.Visit(this);
+            node.Expression.Visit(this);
+
+            var expression = ElementAccessExpression(expressions.Pop())
+                .AddArgumentListArguments(Argument(expressions.Pop()));
+            expression = GetNodeWithAnnotation(expression, node.Location) as ElementAccessExpressionSyntax;
+            expressions.Push(expression);
+        }
+
         public override void VisitLoopNode(LoopNode node)
         {
             node.Count.Visit(this);
@@ -469,9 +485,15 @@ namespace MyCompiler.Visitors
             var array = ArrayCreationExpression(arrayType)
                 .AddTypeRankSpecifiers(rankSpecifier)
                 .WithInitializer(initializer);
-            
-            array = GetNodeWithAnnotation(array, node.Location) as ArrayCreationExpressionSyntax;
-            expressions.Push(array);
+
+            var libraryArray = ObjectCreationExpression(QualifiedName(
+                    IdentifierName("MyCompilerLibrary"),
+                    GenericName("Array").AddTypeArgumentListArguments(arrayType)
+                )).AddArgumentListArguments(Argument(array));
+
+
+            libraryArray = GetNodeWithAnnotation(libraryArray, node.Location) as ObjectCreationExpressionSyntax;
+            expressions.Push(libraryArray);
         }
 
         public override void VisitTupleNode(TupleNode node)

@@ -49,6 +49,8 @@ namespace MyCompiler.Visitors
 
         public virtual void VisitBinaryExpressionNode(BinaryExpressionNode node) { }
 
+        public virtual void VisitIndexAccessExpressionNode(IndexAccessExpressionNode node) { }
+
         public virtual void VisitLoopNode(LoopNode node) { }
 
         public virtual void VisitNetUsingNode(NetUsingNode node) { }
