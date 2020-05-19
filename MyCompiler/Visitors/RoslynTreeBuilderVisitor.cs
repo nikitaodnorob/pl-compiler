@@ -132,6 +132,8 @@ namespace MyCompiler.Visitors
         /// </summary>
         private MethodDeclarationSyntax mainMethodNode;
 
+        private readonly string libraryModuleName;
+
         /// <summary>
         /// Ready C# unit node which prepared for compilation
         /// </summary>
@@ -139,17 +141,20 @@ namespace MyCompiler.Visitors
         {
             get
             {
-                //add C# Main method into class
-                programClassNode = programClassNode.AddMembers(mainMethodNode);
+                //add C# Main method into class, if the file is not part of library
+                if (libraryModuleName == null)
+                    programClassNode = programClassNode.AddMembers(mainMethodNode);
 
                 //declare namespace and add the class into it 
+                string namespaceName = libraryModuleName == null ? "RoslynApp" : "MyCompilerLibrary";
                 NamespaceDeclarationSyntax namespaceNode = 
-                    NamespaceDeclaration(IdentifierName("RoslynApp")).AddMembers(programClassNode);
+                    NamespaceDeclaration(IdentifierName(namespaceName)).AddMembers(programClassNode);
 
                 //add namespace into unit 
                 unitNode = unitNode.AddMembers(namespaceNode);
 
                 //add usings
+                if (libraryModuleName == null) Usings.Add("MyCompilerLibrary");
                 Usings.ForEach(@using => unitNode = unitNode.AddUsings(CreateUsingDirective(@using)));
 
                 return unitNode;
@@ -160,13 +165,15 @@ namespace MyCompiler.Visitors
         /// <summary>
         /// Initializing of visitor
         /// </summary>
-        public RoslynTreeBuilderVisitor()
+        public RoslynTreeBuilderVisitor(string libraryModuleName = null)
         {
             //Create unit
             unitNode = CompilationUnit();
 
-            //Create public class "Program"
-            programClassNode = ClassDeclaration("Program").AddModifiers(Token(SyntaxKind.PublicKeyword));
+            //Create public class "Program" (or library unit's name)
+            this.libraryModuleName = libraryModuleName;
+            string className = libraryModuleName ?? "Program";
+            programClassNode = ClassDeclaration(className).AddModifiers(Token(SyntaxKind.PublicKeyword));
 
             //Create method void Main() 
             mainMethodNode = MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)), "Main");
@@ -353,6 +360,7 @@ namespace MyCompiler.Visitors
                 node.Body.Statements.ForEach(statement => statement.Visit(this));
                 defineFunction = blocks.Pop() as MethodDeclarationSyntax;
             }
+            defineFunction = defineFunction.AddModifiers(Token(SyntaxKind.PublicKeyword));
 
             defineFunction = GetNodeWithAnnotation(defineFunction, node.Location) as MethodDeclarationSyntax;
             programClassNode = programClassNode.AddMembers(defineFunction);

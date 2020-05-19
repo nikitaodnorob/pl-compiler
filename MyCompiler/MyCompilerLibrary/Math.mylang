@@ -1,0 +1,15 @@
+﻿double sin(double angle) {
+	return System.Math.Sin(angle);
+}
+
+double sinDeg(double angle) {
+	return System.Math.Sin(angle * System.Math.PI / 180);
+}
+
+double cos(double angle) {
+	return System.Math.Cos(angle);
+}
+
+double cosDeg(double angle) {
+	return System.Math.Cos(angle * System.Math.PI / 180);
+}

@@ -70,6 +70,36 @@ namespace MyCompiler
 }");
         }
 
+        static Microsoft.CodeAnalysis.SyntaxTree GetLibraryModuleSyntaxTree(string filename)
+        {
+            if (Path.GetExtension(filename) == ".mylang")
+            {
+                if (MakeSyntaxAnalysis(filename, out Node syntaxTree))
+                {
+                    //initialize visitor
+                    RoslynTreeBuilderVisitor visitor = new RoslynTreeBuilderVisitor(Path.GetFileNameWithoutExtension(filename));
+
+                    //run visitor
+                    syntaxTree.Visit(visitor);
+
+                    return visitor.UnitNode.SyntaxTree;
+                }
+                else throw new Exception($"Error in standard library: {Path.GetFileNameWithoutExtension(filename)}");
+            }
+            else if (Path.GetExtension(filename) == ".cs")
+            {
+                try
+                {
+                    return CSharpSyntaxTree.ParseText(File.ReadAllText(filename));
+                }
+                catch
+                {
+                    throw new Exception($"Error in standard library: {Path.GetFileNameWithoutExtension(filename)}");
+                }
+            }
+            else throw new Exception($"Unknow item in standard library: {Path.GetFileNameWithoutExtension(filename)}");
+        }
+
         /// <summary>
         /// Compile the program which is setted by syntax tree
         /// </summary>
@@ -92,9 +122,13 @@ namespace MyCompiler
             //get syntax trees of standard library
             var arraySyntaxTree = CSharpSyntaxTree.ParseText(File.ReadAllText("../../../MyCompilerLibrary/Array.cs"));
 
+            var syntaxTrees = new List<Microsoft.CodeAnalysis.SyntaxTree> { programUnit.SyntaxTree };
+            foreach (var file in Directory.GetFiles("../../../MyCompilerLibrary/"))
+                syntaxTrees.Add(GetLibraryModuleSyntaxTree(file));
+
             CSharpCompilation compilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { programUnit.SyntaxTree, arraySyntaxTree },
+                syntaxTrees,
                 new[] {
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                     MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
@@ -137,14 +171,9 @@ namespace MyCompiler
             //Console.WriteLine(programUnit.NormalizeWhitespace().ToFullString());
         }
 
-        static void Main(string[] args)
+        static bool MakeSyntaxAnalysis(string sourceFileName, out Node root)
         {
-            //set culture for correct double values parsing
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
-
-            //get parameters of command line
-            string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/cycles.mylang";
-            string outputFileName = args.Length > 1 ? args[1] : "../../../out/program.exe";
+            root = null;
 
             string sourceCode = File.ReadAllText(sourceFileName);
 
@@ -155,10 +184,21 @@ namespace MyCompiler
             //syntax analysis
             Parser parser = new Parser(scanner);
             bool isCorrect = parser.Parse();
+            if (isCorrect) root = parser.Root;
+            return isCorrect;
+        }
 
-            if (isCorrect) //if program was parsed successfully
+        static void Main(string[] args)
+        {
+            //set culture for correct double values parsing
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
+            //get parameters of command line
+            string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/cycles.mylang";
+            string outputFileName = args.Length > 1 ? args[1] : "../../../out/program.exe";
+
+            if (MakeSyntaxAnalysis(sourceFileName, out Node syntaxTree)) //if program was parsed successfully
             {
-                Node syntaxTree = parser.Root; //get program's syntax tree
                 Compile(syntaxTree, outputFileName); //compile the program
             }
         }
