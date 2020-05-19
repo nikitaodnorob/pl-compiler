@@ -19,6 +19,8 @@ namespace MyCompiler.Visitors
 
         public virtual void VisitRealNumNode(RealNumNode node) { }
 
+        public virtual void VisitStringNode(StringNode node) { }
+
         public virtual void VisitIDNode(IDNode node) { }
 
         public virtual void VisitComplexIDNode(ComplexIDNode node) { }

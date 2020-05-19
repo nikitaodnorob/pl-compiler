@@ -9,6 +9,7 @@ AlphaDigit	{Alpha}|{Digit}
 INTNUM		{Digit}+
 REALNUM		{INTNUM}\.{INTNUM}
 ID			{Alpha}{AlphaDigit}*
+STRING      \"[^"\n]*\"
 
 %%
 
@@ -20,6 +21,11 @@ ID			{Alpha}{AlphaDigit}*
 {REALNUM} { 
 	yylval.dValue = double.Parse(yytext);
 	return (int)Tokens.REALNUM;
+}
+
+{STRING} {
+    yylval.sValue = yytext;
+    return (int)Tokens.STRING;
 }
 
 {ID} {

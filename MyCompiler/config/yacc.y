@@ -51,7 +51,7 @@
 
 %token <iValue> INTNUM
 %token <dValue> REALNUM
-%token <sValue> ID
+%token <sValue> ID STRING
 
 %type <exprValue> expression expr2 expr3
 %type <statValue> statement stmt stmtSemicolon
@@ -218,6 +218,7 @@ expr2           : expr2 MUL expr3 { $$ = new BinaryExpressionNode($1, $3, "*", @
 
 expr3           : INTNUM { $$ = new IntNumNode($1, @$); }
                 | REALNUM { $$ = new RealNumNode($1, @$); }
+                | STRING { $$ = new StringNode($1, @$); }
                 | complexIdent { $$ = $1; }
                 | callFuncExpr { $$ = $1; }
                 | array { $$ = $1; }

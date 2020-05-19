@@ -26,6 +26,15 @@ namespace MyCompiler.SyntaxTree
         public override void Visit(BaseVisitor visitor) => visitor.VisitRealNumNode(this);
     }
 
+    public class StringNode : ExprNode
+    {
+        public string Text { get; private set; }
+
+        public StringNode(string text, LexLocation location) { Text = text.Trim('"'); Location = location; }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitStringNode(this);
+    }
+
     public class IDNode : ExprNode
     {
         public string Text { get; private set; }

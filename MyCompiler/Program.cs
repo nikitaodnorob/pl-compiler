@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using MyCompiler.Visitors;
@@ -140,7 +140,7 @@ namespace MyCompiler
         static void Main(string[] args)
         {
             //set culture for correct double values parsing
-            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
             //get parameters of command line
             string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/tuples.mylang";

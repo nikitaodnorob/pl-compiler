@@ -218,6 +218,13 @@ namespace MyCompiler.Visitors
             expressions.Push(literal);
         }
 
+        public override void VisitStringNode(StringNode node)
+        {
+            var literal = LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(node.Text));
+            literal = GetNodeWithAnnotation(literal, node.Location) as LiteralExpressionSyntax;
+            expressions.Push(literal);
+        }
+
         public override void VisitIDNode(IDNode node)
         {
             var identifer = IdentifierName(node.Text);
