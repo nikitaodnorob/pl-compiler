@@ -564,9 +564,10 @@ namespace MyCompiler.Visitors
             node.Statement.Visit(this);
 
             node.ID.Visit(this);
+            var counterId = expressions.Pop() as IdentifierNameSyntax;
 
             var block = blocks.Pop() as BlockSyntax;
-            var counterId = expressions.Pop() as IdentifierNameSyntax;
+            
             var @for = ForStatement(block)
                 .AddInitializers(AssignmentExpression(
                     SyntaxKind.SimpleAssignmentExpression,
@@ -579,6 +580,20 @@ namespace MyCompiler.Visitors
                     LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(node.To))
                 ))
                 .AddIncrementors(PostfixUnaryExpression(SyntaxKind.PostIncrementExpression, counterId));
+
+            node.Type?.Visit(this);
+            if (node.Type == null) @for = @for.AddInitializers(AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                counterId,
+                LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(node.From))
+            ));
+            else @for = @for.WithDeclaration(
+                VariableDeclaration(expressions.Pop() as TypeSyntax)
+                    .AddVariables(VariableDeclarator(counterId.Identifier).WithInitializer(EqualsValueClause(
+                        LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(node.From))
+                    )))
+            );
+
             @for = GetNodeWithAnnotation(@for, node.Location) as ForStatementSyntax;
 
             AddStatementToCurrentBlock(@for);

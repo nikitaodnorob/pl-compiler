@@ -180,7 +180,9 @@ defineTuple     : LRBRACKET defTupleVarsList RRBRACKET ASSIGNEQ tupleExpr { $$ =
 
 assignTuple     : tupleVar ASSIGNEQ tupleExpr { $$ = new AssignTupleNode($1, $3, @$); } ;
 
-for             : FOR ident IN INTNUM RANGE INTNUM statement { $$ = new ForNode($2, null, $4, $6, $7, @$); } ;
+for             : FOR ident IN INTNUM RANGE INTNUM statement { $$ = new ForNode($2, null, $4, $6, $7, @$); }
+                | FOR type ident IN INTNUM RANGE INTNUM statement { $$ = new ForNode($3, $2, $5, $7, $8, @$); }
+                ;
 
 stmt            : block { $$ = $1; }
                 | defineFuncStmt { $$ = $1; }
