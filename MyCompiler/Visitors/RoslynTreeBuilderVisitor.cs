@@ -557,5 +557,31 @@ namespace MyCompiler.Visitors
 
             AddStatementToCurrentBlock(ExpressionStatement(assignTuple));
         }
+
+        public override void VisitForNode(ForNode node)
+        {
+            blocks.Push(Block());
+            node.Statement.Visit(this);
+
+            node.ID.Visit(this);
+
+            var block = blocks.Pop() as BlockSyntax;
+            var counterId = expressions.Pop() as IdentifierNameSyntax;
+            var @for = ForStatement(block)
+                .AddInitializers(AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    counterId,
+                    LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(node.From))
+                ))
+                .WithCondition(BinaryExpression(
+                    SyntaxKind.LessThanOrEqualExpression,
+                    counterId,
+                    LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(node.To))
+                ))
+                .AddIncrementors(PostfixUnaryExpression(SyntaxKind.PostIncrementExpression, counterId));
+            @for = GetNodeWithAnnotation(@for, node.Location) as ForStatementSyntax;
+
+            AddStatementToCurrentBlock(@for);
+        }
     }
 }

@@ -49,6 +49,7 @@ STRING      \"[^"\n]*\"
 "." { return (int)Tokens.DOT; }
 "[" { return (int)Tokens.LSBRACKET; }
 "]" { return (int)Tokens.RSBRACKET; }
+".." { return (int)Tokens.RANGE; }
 
 [^ \r\n\t] {
 	LexError();
@@ -81,6 +82,8 @@ static class LexerHelper
         keywords.Add("return", (int)Tokens.RETURN);
         keywords.Add("loop", (int)Tokens.LOOP);
         keywords.Add("netusing", (int)Tokens.NETUSING);
+        keywords.Add("for", (int)Tokens.FOR);
+        keywords.Add("in", (int)Tokens.IN);
     }
 
     public static int GetIDToken(string s) => keywords.ContainsKey(s) ? keywords[s] : (int)Tokens.ID;

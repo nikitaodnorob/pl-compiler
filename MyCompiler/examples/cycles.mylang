@@ -7,3 +7,7 @@ void print222() {
 }
 
 print222();
+
+print "Numbers from 1 to 5";
+int i;
+for i in 1..5 print i;

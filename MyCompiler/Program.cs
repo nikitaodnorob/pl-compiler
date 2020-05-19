@@ -143,7 +143,7 @@ namespace MyCompiler
             Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
             //get parameters of command line
-            string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/tuples.mylang";
+            string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/cycles.mylang";
             string outputFileName = args.Length > 1 ? args[1] : "../../../out/program.exe";
 
             string sourceCode = File.ReadAllText(sourceFileName);

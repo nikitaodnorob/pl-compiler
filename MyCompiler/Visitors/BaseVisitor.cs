@@ -66,5 +66,7 @@ namespace MyCompiler.Visitors
         public virtual void VisitTupleVarNode(TupleVarNode node) { }
 
         public virtual void VisitAssignTupleNode(AssignTupleNode node) { }
+
+        public virtual void VisitForNode(ForNode node) { }
     }
 }

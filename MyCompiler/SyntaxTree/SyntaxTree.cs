@@ -330,4 +330,20 @@ namespace MyCompiler.SyntaxTree
 
         public override void Visit(BaseVisitor visitor) => visitor.VisitAssignTupleNode(this);
     }
+
+    public class ForNode : StatNode
+    {
+        public IDNode ID { get; private set; }
+        public TypeNode Type { get; private set; }
+        public int From { get; private set; }
+        public int To { get; private set; }
+        public StatNode Statement { get; private set; }
+
+        public ForNode(IDNode id, TypeNode type, int from, int to, StatNode stat, LexLocation location)
+        {
+            ID = id; Type = type; From = from; To = to; Statement = stat; Location = location;
+        }
+
+        public override void Visit(BaseVisitor visitor) => visitor.VisitForNode(this);
+    }
 }

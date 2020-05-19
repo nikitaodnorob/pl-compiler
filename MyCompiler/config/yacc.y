@@ -30,6 +30,7 @@
     public DefineTupleNode defineTupleValue;
     public TupleVarNode tupleVarValue;
     public AssignTupleNode assignTupleValue;
+    public ForNode forValue;
 
     public List<AssignVarNode> defineVarsListValue;
     public List<TypeIDListElementNode> typeIdListElementsValue;
@@ -44,10 +45,10 @@
 
 %namespace MyCompiler
 
-%token COMMA SEMICOLON PRINT RETURN LOOP DOT NETUSING 
+%token COMMA SEMICOLON PRINT RETURN LOOP DOT NETUSING FOR IN
 %token LRBRACKET RRBRACKET LFBRACKET RFBRACKET LSBRACKET RSBRACKET
 %token ASSIGNEQ
-%token PLUS MINUS MUL DIV MOD
+%token PLUS MINUS MUL DIV MOD RANGE
 
 %token <iValue> INTNUM
 %token <dValue> REALNUM
@@ -88,6 +89,8 @@
 %type <typeIdListElementsValue> defTupleVarsList
 %type <idsListValue> tupleVarList
 %type <assignTupleValue> assignTuple
+
+%type <forValue> for
 
 %%
 
@@ -177,9 +180,12 @@ defineTuple     : LRBRACKET defTupleVarsList RRBRACKET ASSIGNEQ tupleExpr { $$ =
 
 assignTuple     : tupleVar ASSIGNEQ tupleExpr { $$ = new AssignTupleNode($1, $3, @$); } ;
 
+for             : FOR ident IN INTNUM RANGE INTNUM statement { $$ = new ForNode($2, null, $4, $6, $7, @$); } ;
+
 stmt            : block { $$ = $1; }
                 | defineFuncStmt { $$ = $1; }
                 | loop { $$ = $1; }
+                | for { $$ = $1; }
                 ;
 
 stmtSemicolon   : printStmt { $$ = $1; }
