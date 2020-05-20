@@ -46,7 +46,7 @@ namespace MyCompilerLibrary
 
         public static implicit operator Array<T>(T[] array) => new Array<T>(array);
 
-        public Array<int> indexes
+        public Array<int> indices
         {
             get
             {

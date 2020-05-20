@@ -134,6 +134,7 @@ namespace MyCompiler
                     MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
                     MetadataReference.CreateFromFile(Assembly.Load("System.Console").Location),
                     MetadataReference.CreateFromFile(Assembly.Load("System.Linq").Location),
+                    MetadataReference.CreateFromFile(typeof(System.Diagnostics.Stopwatch).Assembly.Location),
                 },
                 new CSharpCompilationOptions(
                     OutputKind.ConsoleApplication, //set application type as console app
@@ -194,7 +195,7 @@ namespace MyCompiler
             Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
             //get parameters of command line
-            string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/cycles.mylang";
+            string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/performance.mylang";
             string outputFileName = args.Length > 1 ? args[1] : "../../../out/program.exe";
 
             if (MakeSyntaxAnalysis(sourceFileName, out Node syntaxTree)) //if program was parsed successfully

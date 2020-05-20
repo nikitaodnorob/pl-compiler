@@ -501,10 +501,9 @@ namespace MyCompiler.Visitors
                 .AddTypeRankSpecifiers(rankSpecifier)
                 .WithInitializer(initializer);
 
-            var libraryArray = ObjectCreationExpression(QualifiedName(
-                    IdentifierName("MyCompilerLibrary"),
+            var libraryArray = ObjectCreationExpression(
                     GenericName("Array").AddTypeArgumentListArguments(arrayType)
-                )).AddArgumentListArguments(Argument(array));
+                ).AddArgumentListArguments(Argument(array));
 
 
             libraryArray = GetNodeWithAnnotation(libraryArray, node.Location) as ObjectCreationExpressionSyntax;
