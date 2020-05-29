@@ -137,34 +137,27 @@ namespace MyCompiler
                     MetadataReference.CreateFromFile(typeof(System.Diagnostics.Stopwatch).Assembly.Location),
                 },
                 new CSharpCompilationOptions(
-                    OutputKind.ConsoleApplication, //set application type as console app
-                    true, //report about suppressed errors and warnings
-                    null, //default module name
-                    null, //set that any static Main method is may be entrypoint
-                    null,
-                    null, //set empty list of usings
-                    OptimizationLevel.Release //set optimization level for Release mode
+                    outputKind: OutputKind.ConsoleApplication, //set application type as console app
+                    optimizationLevel: OptimizationLevel.Release //set optimization level for Release mode
                 )
             );
 
             string configPath = Path.GetDirectoryName(outputFileName) + "/" + Path.GetFileNameWithoutExtension(outputFileName) + ".runtimeconfig.json";
-            GenerateRuntimeConfig(configPath); //generate runtime config
+            GenerateRuntimeConfig(configPath.TrimStart('/')); //generate runtime config
 
             //generate program to file
-            using (var exeStream = new FileStream(outputFileName, FileMode.Create))
+            using var exeStream = new FileStream(outputFileName, FileMode.Create);
+            var emitResult = compilation.Emit(exeStream); //compile
+
+            //if we have warnings, print them
+            foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel > 0))
+                Console.WriteLine(errorFormatter.GetErrorString(error, locationMap));
+
+            if (!emitResult.Success)
             {
-                var emitResult = compilation.Emit(exeStream); //compile
-
-                //if we have warnings, print them
-                foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel > 0))
+                //if we have errors, print them
+                foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel == 0))
                     Console.WriteLine(errorFormatter.GetErrorString(error, locationMap));
-
-                if (!emitResult.Success)
-                {
-                    //if we have errors, print them
-                    foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel == 0))
-                        Console.WriteLine(errorFormatter.GetErrorString(error, locationMap));
-                }
             }
 
             //print C# source code which matches to builded Roslyn's syntax tree
