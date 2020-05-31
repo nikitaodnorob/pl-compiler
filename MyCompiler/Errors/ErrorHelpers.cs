@@ -25,7 +25,7 @@ namespace MyCompiler.Errors
             var errorSpan = diagnostic.Location.SourceSpan; //get error Roslyn's span
             var arguments = diagnostic.Arguments;
             string errorMessage = errorList.GetErrorMessage(diagnostic, arguments);
-            if (errorMessage != "") errorMessage = ": " + errorMessage;
+            if (errorMessage.Length > 0) errorMessage = ": " + errorMessage;
 
             var (errorSpanStart, errorSpanEnd) = (errorSpan.Start, errorSpan.End);
             try

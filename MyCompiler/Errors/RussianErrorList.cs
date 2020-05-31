@@ -10,13 +10,12 @@ namespace MyCompiler.Errors
     {
         public override string GetErrorTemplate(int code)
         {
-            switch (code)
+            return code switch
             {
-                case 103:
-                    return "Неизвестный идентификатор {0}";
-                default:
-                    return "";
-            }
+                103 => "Unknow identifier '{0}'",
+                266 => "Can't convert type '{0}' to '{1}'",
+                _ => "",
+            };
         }
     }
 }
