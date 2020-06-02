@@ -1,0 +1,3 @@
+[submodule "Roslyn"]
+	path = Roslyn
+	url = git@github.com:nikitaodnorob/pl-roslyn.git
