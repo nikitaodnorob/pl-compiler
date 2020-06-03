@@ -25,13 +25,13 @@
 
   <ItemGroup>
     <Reference Include="Microsoft.CodeAnalysis">
-      <HintPath>..\RoslynLibraries\Microsoft.CodeAnalysis.dll</HintPath>
+      <HintPath>..\Roslyn\artifacts\bin\Microsoft.CodeAnalysis\Debug\netcoreapp3.1\Microsoft.CodeAnalysis.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Microsoft.CodeAnalysis.CSharp">
-      <HintPath>..\RoslynLibraries\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
+      <HintPath>..\Roslyn\artifacts\bin\Microsoft.CodeAnalysis.CSharp\Debug\netcoreapp3.1\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
 
