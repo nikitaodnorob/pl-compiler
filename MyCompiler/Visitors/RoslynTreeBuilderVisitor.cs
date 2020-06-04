@@ -113,6 +113,11 @@ namespace MyCompiler.Visitors
         }
 
         /// <summary>
+        /// Index of service variable '#loopCounter{id}' for loop cycle
+        /// </summary>
+        private int loopCountInd = 0;
+
+        /// <summary>
         /// Node of C# unit which contains all classes
         /// </summary>
         private CompilationUnitSyntax unitNode;
@@ -450,8 +455,8 @@ namespace MyCompiler.Visitors
         {
             node.Count.Visit(this);
 
-            var counterVar = VariableDeclarator("#loopCounter");
-            var counterId = IdentifierName("#loopCounter");
+            var counterVar = VariableDeclarator("#loopCounter" + (++loopCountInd));
+            var counterId = IdentifierName("#loopCounter" + loopCountInd);
 
             blocks.Push(Block());
             if (node.Statement is BlockNode) (node.Statement as BlockNode).Statements.ForEach(st => st.Visit(this));
