@@ -2,11 +2,9 @@
 	print 1;
 }
 
-void print222() {
-	loop (3) print 2;
+loop (2) {
+	loop (2) print 2;
 }
-
-print222();
 
 print "Numbers from 1 to 5";
 for int i in 1..5 print i;

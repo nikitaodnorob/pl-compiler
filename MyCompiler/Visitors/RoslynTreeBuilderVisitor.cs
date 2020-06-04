@@ -113,7 +113,7 @@ namespace MyCompiler.Visitors
         }
 
         /// <summary>
-        /// Index of service variable '#loop{id}' for loop cycle
+        /// Index of service variable '#loopCounter{id}' for loop cycle
         /// </summary>
         private int loopCountInd = 0;
 
@@ -172,7 +172,7 @@ namespace MyCompiler.Visitors
 
             //Create public class "Program" (or library unit's name)
             this.libraryModuleName = libraryModuleName;
-            string className = libraryModuleName ?? "Program";
+            string className = libraryModuleName ?? "$Program";
             programClassNode = ClassDeclaration(className).AddModifiers(Token(SyntaxKind.PublicKeyword));
 
             //Create method void Main() 
@@ -454,32 +454,32 @@ namespace MyCompiler.Visitors
         public override void VisitLoopNode(LoopNode node)
         {
             node.Count.Visit(this);
-            var countExpr = expressions.Pop();
-            countExpr = GetNodeWithAnnotation(countExpr, node.Count.Location) as ExpressionSyntax;
 
-            string countVarName = "#loop" + ++loopCountInd;
-            var count = VariableDeclaration(ParseTypeName("long"))
-                .AddVariables(VariableDeclarator(countVarName)
-                    .WithInitializer(EqualsValueClause(LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(0))))
-                );
-            AddVariableToCurrentBlock(count);
+            var counterVar = VariableDeclarator("#loopCounter" + (++loopCountInd));
+            var counterId = IdentifierName("#loopCounter" + loopCountInd);
 
             blocks.Push(Block());
             if (node.Statement is BlockNode) (node.Statement as BlockNode).Statements.ForEach(st => st.Visit(this));
             else node.Statement.Visit(this);
 
-            var increment = ExpressionStatement(PrefixUnaryExpression(
-                SyntaxKind.PreIncrementExpression,
-                IdentifierName(countVarName)
-            ));
-            AddStatementToCurrentBlock(increment);
+            var forCondition = GetNodeWithAnnotation(BinaryExpression(
+                    SyntaxKind.LessThanExpression,
+                    counterId,
+                    expressions.Pop()
+            ), node.Count.Location) as ExpressionSyntax;
 
-            var whileBlock = blocks.Pop() as BlockSyntax;
-            var whileNode = WhileStatement(
-                BinaryExpression(SyntaxKind.LessThanExpression, IdentifierName(countVarName), countExpr),
-                whileBlock
-            );
-            AddStatementToCurrentBlock(whileNode);
+            var @for = ForStatement(blocks.Pop() as BlockSyntax)
+                .WithDeclaration(
+                    VariableDeclaration(ParseTypeName("long"))
+                    .AddVariables(counterVar.WithInitializer(EqualsValueClause(
+                        LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(0))
+                    )))
+                )
+                .WithCondition(forCondition)
+                .AddIncrementors(PostfixUnaryExpression(SyntaxKind.PostIncrementExpression, counterId));
+
+            @for = GetNodeWithAnnotation(@for, node.Location) as ForStatementSyntax;
+            AddStatementToCurrentBlock(@for);
         }
 
         public override void VisitNetUsingNode(NetUsingNode node) => Usings.Add(node.ID.Text);

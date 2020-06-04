@@ -1,0 +1,4 @@
+[submodule "Roslyn"]
+	path = Roslyn
+	url = https://github.com/nikitaodnorob/roslyn-csharp.git
+	branch = Diploma
