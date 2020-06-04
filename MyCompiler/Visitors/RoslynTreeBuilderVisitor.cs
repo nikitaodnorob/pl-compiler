@@ -172,7 +172,7 @@ namespace MyCompiler.Visitors
 
             //Create public class "Program" (or library unit's name)
             this.libraryModuleName = libraryModuleName;
-            string className = libraryModuleName ?? "Program";
+            string className = libraryModuleName ?? "$Program";
             programClassNode = ClassDeclaration(className).AddModifiers(Token(SyntaxKind.PublicKeyword));
 
             //Create method void Main() 
