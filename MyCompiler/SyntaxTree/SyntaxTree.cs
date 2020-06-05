@@ -296,9 +296,9 @@ namespace MyCompiler.SyntaxTree
     public class DefineTupleNode : StatNode
     {
         public List<TypeIDListElementNode> Variables { get; private set; }
-        public TupleNode TupleValue { get; private set; }
+        public ExprNode TupleValue { get; private set; }
 
-        public DefineTupleNode(List<TypeIDListElementNode> vars, TupleNode value, LexLocation location)
+        public DefineTupleNode(List<TypeIDListElementNode> vars, ExprNode value, LexLocation location)
         {
             Variables = vars; TupleValue = value; Location = location;
         }
@@ -321,9 +321,9 @@ namespace MyCompiler.SyntaxTree
     public class AssignTupleNode : StatNode
     {
         public TupleVarNode Tuple { get; private set; }
-        public TupleNode Value { get; private set; }
+        public ExprNode Value { get; private set; }
 
-        public AssignTupleNode(TupleVarNode tuple, TupleNode value, LexLocation location)
+        public AssignTupleNode(TupleVarNode tuple, ExprNode value, LexLocation location)
         {
             Tuple = tuple; Value = value; Location = location;
         }

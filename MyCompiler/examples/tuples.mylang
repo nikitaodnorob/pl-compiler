@@ -1,8 +1,18 @@
-﻿(int a, int b) = (1,2);
+﻿(int a, int b) = (1, 2);
 int c, d;
-(c, d) = (3,4);
+(c, d) = (3, 4);
 
 print a;
 print b;
 print c;
 print d;
+
+print "Распаковка массива в переменные";
+
+(int el1, int el2) = int { 50, 100 };
+int[] array = int { 150, 200 };
+(a, b) = array;
+print el1;
+print el2;
+print a;
+print b;

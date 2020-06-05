@@ -176,9 +176,15 @@ tupleVarList    : ident COMMA ident { $$ = new List<IDNode> { $1, $3 }; }
 
 tupleVar        : LRBRACKET tupleVarList RRBRACKET { $$ = new TupleVarNode($2, @$); } ;
 
-defineTuple     : LRBRACKET defTupleVarsList RRBRACKET ASSIGNEQ tupleExpr { $$ = new DefineTupleNode($2, $5, @$); } ;
+defineTuple     : LRBRACKET defTupleVarsList RRBRACKET ASSIGNEQ tupleExpr { $$ = new DefineTupleNode($2, $5, @$); }
+                | LRBRACKET defTupleVarsList RRBRACKET ASSIGNEQ array { $$ = new DefineTupleNode($2, $5, @$); }
+                | LRBRACKET defTupleVarsList RRBRACKET ASSIGNEQ ident { $$ = new DefineTupleNode($2, $5, @$); }
+                ;
 
-assignTuple     : tupleVar ASSIGNEQ tupleExpr { $$ = new AssignTupleNode($1, $3, @$); } ;
+assignTuple     : tupleVar ASSIGNEQ tupleExpr { $$ = new AssignTupleNode($1, $3, @$); }
+                | tupleVar ASSIGNEQ array { $$ = new AssignTupleNode($1, $3, @$); }
+                | tupleVar ASSIGNEQ ident { $$ = new AssignTupleNode($1, $3, @$); }
+                ;
 
 for             : FOR ident IN INTNUM RANGE INTNUM statement { $$ = new ForNode($2, null, $4, $6, $7, @$); }
                 | FOR type ident IN INTNUM RANGE INTNUM statement { $$ = new ForNode($3, $2, $5, $7, $8, @$); }
