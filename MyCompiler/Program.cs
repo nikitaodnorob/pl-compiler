@@ -150,7 +150,7 @@ namespace MyCompiler
             var emitResult = compilation.Emit(exeStream); //compile
 
             //if we have warnings, print them
-            foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel > 0))
+            foreach (var error in emitResult.Diagnostics.Where(diagnostic => diagnostic.WarningLevel > 0 && diagnostic.WarningLevel < 4))
                 Console.WriteLine(errorFormatter.GetErrorString(error, locationMap));
 
             if (!emitResult.Success)
