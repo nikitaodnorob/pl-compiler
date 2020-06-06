@@ -1,5 +1,5 @@
 # PL-Compiler
-Simple programming language's compiler which uses Lex, Yacc and Roslyn
+Simple programming language's compiler for .NET Core platform which uses Lex, Yacc and Roslyn
 
 ## Why are a few projects in this solution?
 The main project is `MyCompiler`, it is a project of my language's compiler. `Roslyn` is the submodule which contains modified `Microsoft.CodeAnalysis.CSharp` project.
@@ -44,3 +44,7 @@ Unpacking array to variables
 150
 200
 ```
+
+## System requirements
+* OS Windows (for `gppg` launching; later the compiled parser will be uploaded to repository)
+* Installed .NET Core version 3.1 or above
