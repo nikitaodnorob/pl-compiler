@@ -188,12 +188,17 @@ namespace MyCompiler
             Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
             //get parameters of command line
-            string sourceFileName = args.Length > 0 ? args[0] : "../../../examples/tuples.mylang";
-            string outputFileName = args.Length > 1 ? args[1] : "../../../out/program.exe";
-
-            if (MakeSyntaxAnalysis(sourceFileName, out Node syntaxTree)) //if program was parsed successfully
+            if (args.Length < 2)
             {
-                Compile(syntaxTree, outputFileName); //compile the program
+                Console.WriteLine("Incorrect command line parameters for compiling");
+                Console.WriteLine("Correct command line:");
+                Console.WriteLine("MyCompiler.exe <source MYLANG file> <output EXE filename>");
+                return;
+            }
+
+            if (MakeSyntaxAnalysis(args[0], out Node syntaxTree)) //if program was parsed successfully
+            {
+                Compile(syntaxTree, args[1]); //compile the program
             }
         }
     }
