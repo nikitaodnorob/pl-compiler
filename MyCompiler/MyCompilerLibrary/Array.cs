@@ -73,5 +73,53 @@ namespace MyCompilerLibrary
         {
             (arr[i], arr[j]) = (arr[j], arr[i]);
         }
+
+        #region Deconstruct methods
+        public void Deconstruct(out T el1)
+        {
+            if (length != 1) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0];
+        }
+        public void Deconstruct(out T el1, out T el2)
+        {
+            if (length != 2) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1];
+        }
+        public void Deconstruct(out T el1, out T el2, out T el3)
+        {
+            if (length != 3) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1]; el3 = arr[2];
+        }
+        public void Deconstruct(out T el1, out T el2, out T el3, out T el4)
+        {
+            if (length != 4) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1]; el3 = arr[2]; el4 = arr[3];
+        }
+        public void Deconstruct(out T el1, out T el2, out T el3, out T el4, out T el5)
+        {
+            if (length != 5) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1]; el3 = arr[2]; el4 = arr[3]; el5 = arr[4];
+        }
+        public void Deconstruct(out T el1, out T el2, out T el3, out T el4, out T el5, out T el6)
+        {
+            if (length != 6) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1]; el3 = arr[2]; el4 = arr[3]; el5 = arr[4]; el6 = arr[5];
+        }
+        public void Deconstruct(out T el1, out T el2, out T el3, out T el4, out T el5, out T el6, out T el7)
+        {
+            if (length != 7) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1]; el3 = arr[2]; el4 = arr[3]; el5 = arr[4]; el6 = arr[5]; el7 = arr[6];
+        }
+        public void Deconstruct(out T el1, out T el2, out T el3, out T el4, out T el5, out T el6, out T el7, out T el8)
+        {
+            if (length != 8) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1]; el3 = arr[2]; el4 = arr[3]; el5 = arr[4]; el6 = arr[5]; el7 = arr[6]; el8 = arr[7];
+        }
+        public void Deconstruct(out T el1, out T el2, out T el3, out T el4, out T el5, out T el6, out T el7, out T el8, out T el9)
+        {
+            if (length != 9) throw new Exception("Размерности массива и кортежа не совпадают");
+            el1 = arr[0]; el2 = arr[1]; el3 = arr[2]; el4 = arr[3]; el5 = arr[4]; el6 = arr[5]; el7 = arr[6]; el8 = arr[7]; el9 = arr[8];
+        }
+        #endregion
     }
 }
